@@ -1,0 +1,301 @@
+{
+  "config": {
+    "epochs": 30,
+    "test_size": 0.2,
+    "seed": 42,
+    "folds": 5,
+    "no_cv": false
+  },
+  "dataset": {
+    "n_samples": 32000,
+    "n_clickbait": 15999,
+    "n_non_clickbait": 16001,
+    "clickbait_ratio": 0.5,
+    "avg_words": 9.07,
+    "min_words": 1,
+    "max_words": 26
+  },
+  "averaged_perceptron": {
+    "accuracy": 0.975625,
+    "precision": 0.9777150031387319,
+    "recall": 0.9734375,
+    "f1": 0.975571562793611,
+    "confusion_matrix": {
+      "tn": 3129,
+      "fp": 71,
+      "fn": 85,
+      "tp": 3115
+    },
+    "roc_auc": 0.99709755859375,
+    "train_time_s": 2.429,
+    "inference_time_s": 0.0003,
+    "n_updates": 24904,
+    "n_features": 33
+  },
+  "verification": {
+    "vanilla_perceptron_acc": 0.97,
+    "averaged_perceptron_acc": 0.9756,
+    "sklearn_perceptron_acc": 0.967
+  },
+  "cross_validation": {
+    "accuracy": {
+      "mean": 0.9764062500000001,
+      "std": 0.0017455300054711183
+    },
+    "precision": {
+      "mean": 0.9750934300375477,
+      "std": 0.00423049754115393
+    },
+    "recall": {
+      "mean": 0.9778108979368552,
+      "std": 0.0025022039186575543
+    },
+    "f1": {
+      "mean": 0.9764408252733894,
+      "std": 0.0017020101822917972
+    },
+    "roc_auc": {
+      "mean": 0.9973130468272476,
+      "std": 0.0003214795383717792
+    }
+  },
+  "tfidf_logreg_baseline": {
+    "accuracy": 0.96890625,
+    "precision": 0.9740916271721959,
+    "recall": 0.9634375,
+    "f1": 0.9687352710133543,
+    "confusion_matrix": {
+      "tn": 3118,
+      "fp": 82,
+      "fn": 117,
+      "tp": 3083
+    },
+    "roc_auc": 0.9957178710937499,
+    "train_time_s": 0.97,
+    "n_features": 20000
+  },
+  "interpretability_examples": [
+    {
+      "headline": "17 Things Only People Who Love Coffee Will Understand",
+      "decision_score": 87.2858367983413,
+      "prediction": "clickbait",
+      "top_contributions": [
+        {
+          "feature": "title_case_ratio",
+          "raw_value": 1.0,
+          "contribution": 90.51753525570398
+        },
+        {
+          "feature": "clickbait_phrase_count",
+          "raw_value": 1.0,
+          "contribution": 49.84898977031394
+        },
+        {
+          "feature": "has_clickbait_phrase",
+          "raw_value": 1.0,
+          "contribution": -37.12363221132666
+        },
+        {
+          "feature": "starts_with_number",
+          "raw_value": 1.0,
+          "contribution": 23.118191833330023
+        },
+        {
+          "feature": "emotional_word_count",
+          "raw_value": 1.0,
+          "contribution": 16.674745895294453
+        },
+        {
+          "feature": "positive_word_count",
+          "raw_value": 1.0,
+          "contribution": 16.63244038492211
+        }
+      ]
+    },
+    {
+      "headline": "You Won't Believe What This Dog Did Next",
+      "decision_score": 48.25307524708316,
+      "prediction": "clickbait",
+      "top_contributions": [
+        {
+          "feature": "title_case_ratio",
+          "raw_value": 1.0,
+          "contribution": 90.51753525570398
+        },
+        {
+          "feature": "clickbait_phrase_count",
+          "raw_value": 1.0,
+          "contribution": 49.84898977031394
+        },
+        {
+          "feature": "has_clickbait_phrase",
+          "raw_value": 1.0,
+          "contribution": -37.12363221132666
+        },
+        {
+          "feature": "demonstrative_count",
+          "raw_value": 1.0,
+          "contribution": 14.839920241319744
+        },
+        {
+          "feature": "second_person_count",
+          "raw_value": 1.0,
+          "contribution": 10.055766196030797
+        },
+        {
+          "feature": "char_count",
+          "raw_value": 40.0,
+          "contribution": 7.577667503990299
+        }
+      ]
+    },
+    {
+      "headline": "Which Disney Princess Are You Based On Your Zodiac Sign",
+      "decision_score": 166.30807686824022,
+      "prediction": "clickbait",
+      "top_contributions": [
+        {
+          "feature": "clickbait_phrase_count",
+          "raw_value": 2.0,
+          "contribution": 115.3791396172913
+        },
+        {
+          "feature": "title_case_ratio",
+          "raw_value": 1.0,
+          "contribution": 90.51753525570398
+        },
+        {
+          "feature": "starts_with_question_word",
+          "raw_value": 1.0,
+          "contribution": 38.875657613392036
+        },
+        {
+          "feature": "has_clickbait_phrase",
+          "raw_value": 1.0,
+          "contribution": -37.12363221132666
+        },
+        {
+          "feature": "second_person_count",
+          "raw_value": 2.0,
+          "contribution": 23.97227687926079
+        },
+        {
+          "feature": "stopword_ratio",
+          "raw_value": 0.4,
+          "contribution": 8.423319989292633
+        }
+      ]
+    },
+    {
+      "headline": "Senate Approves Budget Deal After Months of Negotiation",
+      "decision_score": -48.77650059254064,
+      "prediction": "not clickbait",
+      "top_contributions": [
+        {
+          "feature": "title_case_ratio",
+          "raw_value": 0.875,
+          "contribution": 41.38688425205711
+        },
+        {
+          "feature": "clickbait_phrase_count",
+          "raw_value": 0.0,
+          "contribution": -15.681160076663408
+        },
+        {
+          "feature": "has_clickbait_phrase",
+          "raw_value": 0.0,
+          "contribution": 8.194425325746561
+        },
+        {
+          "feature": "stopword_ratio",
+          "raw_value": 0.125,
+          "contribution": -6.2149928185054
+        },
+        {
+          "feature": "avg_word_length",
+          "raw_value": 6.0,
+          "contribution": 5.958873812817003
+        },
+        {
+          "feature": "starts_with_number",
+          "raw_value": 0.0,
+          "contribution": -5.7021495805121285
+        }
+      ]
+    },
+    {
+      "headline": "Scientists Discover New Species of Frog in the Amazon",
+      "decision_score": -121.62298835762087,
+      "prediction": "not clickbait",
+      "top_contributions": [
+        {
+          "feature": "title_case_ratio",
+          "raw_value": 0.6666666666666666,
+          "contribution": -40.49753408735435
+        },
+        {
+          "feature": "clickbait_phrase_count",
+          "raw_value": 0.0,
+          "contribution": -15.681160076663408
+        },
+        {
+          "feature": "has_clickbait_phrase",
+          "raw_value": 0.0,
+          "contribution": 8.194425325746561
+        },
+        {
+          "feature": "starts_with_number",
+          "raw_value": 0.0,
+          "contribution": -5.7021495805121285
+        },
+        {
+          "feature": "double_quote_count",
+          "raw_value": 0.0,
+          "contribution": -5.077775401679847
+        },
+        {
+          "feature": "stopword_ratio",
+          "raw_value": 0.3333333333333333,
+          "contribution": 4.874638096493107
+        }
+      ]
+    },
+    {
+      "headline": "Stocks Fall Sharply as Oil Prices Surge",
+      "decision_score": -56.955410729910554,
+      "prediction": "not clickbait",
+      "top_contributions": [
+        {
+          "feature": "title_case_ratio",
+          "raw_value": 0.8571428571428571,
+          "contribution": 34.368219822964676
+        },
+        {
+          "feature": "clickbait_phrase_count",
+          "raw_value": 0.0,
+          "contribution": -15.681160076663408
+        },
+        {
+          "feature": "word_count",
+          "raw_value": 7.0,
+          "contribution": -9.806219517170257
+        },
+        {
+          "feature": "has_clickbait_phrase",
+          "raw_value": 0.0,
+          "contribution": 8.194425325746561
+        },
+        {
+          "feature": "char_count",
+          "raw_value": 39.0,
+          "contribution": 8.12527183908271
+        },
+        {
+          "feature": "starts_with_number",
+          "raw_value": 0.0,
+          "contribution": -5.7021495805121285
+        }
+      ]
+    }
+  ]
+}
