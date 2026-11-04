@@ -43,6 +43,12 @@ class TestContract:
         assert X.shape == (3, EXPECTED_N_FEATURES)
         assert X.dtype == np.float64
 
+    @pytest.mark.parametrize("headlines", [[], iter(())])
+    def test_empty_transform_keeps_feature_width(self, fx, headlines):
+        X = fx.transform(headlines)
+        assert X.shape == (0, EXPECTED_N_FEATURES)
+        assert X.dtype == np.float64
+
     def test_extract_one_keys_match_names(self, fx):
         d = fx.extract_one("Some Headline")
         assert list(d.keys()) == fx.feature_names
@@ -124,6 +130,42 @@ class TestClickbaitPhrases:
         assert d["clickbait_phrase_count"] == 0.0
         assert d["has_clickbait_phrase"] == 0.0
 
+    @pytest.mark.parametrize("headline", [
+        "Every Day Brings Several Changes To Everything",
+        "There's A New Budget Deal",
+        "There Is A New Budget Deal",
+        "There Are New Budget Measures",
+        "Unranked Teams Win Again",
+        "Whichever Candidate Wins The Election",
+    ])
+    def test_phrases_do_not_match_inside_other_words(self, fx, headline):
+        d = fx.extract_one(headline)
+        assert d["clickbait_phrase_count"] == 0.0
+        assert d["has_clickbait_phrase"] == 0.0
+
+    @pytest.mark.parametrize("headline", [
+        '"Ever!"', "Here's A Dog", "The Teams, Ranked", "Which Dog Are You?",
+    ])
+    def test_phrases_match_whole_words_at_punctuation(self, fx, headline):
+        d = fx.extract_one(headline)
+        assert d["clickbait_phrase_count"] == 1.0
+        assert d["has_clickbait_phrase"] == 1.0
+
+    def test_distinct_phrases_count_once_each(self, fx):
+        assert value(fx, "Ever, ever, ever", "clickbait_phrase_count") == 1.0
+        # Overlapping lexicon entries are still distinct cues.
+        assert value(fx, "Reasons why", "clickbait_phrase_count") == 2.0
+
+    @pytest.mark.parametrize("headline", ["Which", "Which?"])
+    def test_which_trigger_requires_trailing_space(self, fx, headline):
+        assert value(fx, headline, "clickbait_phrase_count") == 0.0
+
+    def test_smart_apostrophes_match_the_same_phrases(self, fx):
+        plain = fx.extract_one("You won't believe what happened")
+        smart = fx.extract_one("You won’t believe what happened")
+        assert smart["clickbait_phrase_count"] == plain["clickbait_phrase_count"] == 2.0
+        assert smart["has_clickbait_phrase"] == plain["has_clickbait_phrase"] == 1.0
+
 
 # --------------------------------------------------------------------------- #
 # Interrogative structure                                                     #
@@ -149,9 +191,16 @@ class TestHyperbole:
     def test_superlative_lexicon(self, fx):
         assert value(fx, "The Best Day Ever", "superlative_count") == 2.0  # best, ever
 
-    def test_superlative_morphological_heuristic(self, fx):
-        # "tallest" is not in the lexicon but the -est heuristic should catch it.
-        assert value(fx, "The Tallest Building", "superlative_count") == 1.0
+    @pytest.mark.parametrize("word", ["tallest", "fastest", "largest", "happiest"])
+    def test_regular_superlatives(self, fx, word):
+        assert value(fx, f"The {word} example", "superlative_count") == 1.0
+
+    @pytest.mark.parametrize("word", ["forest", "arrest", "protest", "honest", "guest"])
+    def test_est_suffix_is_not_enough_for_a_superlative(self, fx, word):
+        assert value(fx, word, "superlative_count") == 0.0
+
+    def test_superlatives_count_each_occurrence_once(self, fx):
+        assert value(fx, "The Best And Best And Tallest", "superlative_count") == 3.0
 
     def test_intensifier(self, fx):
         assert value(fx, "This Is Literally Insane", "intensifier_count") == 1.0

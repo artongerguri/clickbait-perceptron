@@ -19,9 +19,13 @@ import json
 import time
 from pathlib import Path
 
+import matplotlib
 import numpy as np
 from sklearn.linear_model import Perceptron as SklearnPerceptron
 from sklearn.preprocessing import StandardScaler
+
+# This command-line pipeline writes figures to files and needs no GUI toolkit.
+matplotlib.use("Agg")
 
 from src import evaluate, interpret
 from src.baselines import TfidfLogisticRegression

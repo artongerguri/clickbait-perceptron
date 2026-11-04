@@ -23,6 +23,9 @@ class TestClean:
         # Casing and "!"/"?" are clickbait cues and must survive cleaning.
         assert pp.clean("You WON'T Believe This!") == "You WON'T Believe This!"
 
+    def test_canonicalizes_single_quotes_without_dropping_punctuation(self):
+        assert pp.clean("  \u2018You WON\u2019T believe THIS!\u2019  ") == "'You WON'T believe THIS!'"
+
     def test_accepts_non_string_input(self):
         # Labels/ids occasionally arrive as numbers; clean must not crash.
         assert pp.clean(123) == "123"
@@ -43,6 +46,11 @@ class TestTokenize:
             "game-changing",
             "tips",
         ]
+
+    @pytest.mark.parametrize("apostrophe", ["\u2018", "\u2019", "\u201b", "\u02bc", "\uff07"])
+    def test_unicode_contractions_match_ascii_tokens(self, apostrophe):
+        text = f"You won{apostrophe}t believe this! You{apostrophe}ll love it."
+        assert pp.tokenize(text) == pp.tokenize("You won't believe this! You'll love it.")
 
     def test_strips_surrounding_punctuation(self):
         assert pp.tokenize("Wow! Amazing, really?") == ["Wow", "Amazing", "really"]
@@ -69,8 +77,17 @@ class TestUnicode:
         # The fullwidth digit "１" (U+FF11) normalizes to ASCII "1" under NFKC.
         assert pp.normalize_unicode("１") == "1"
 
+    @pytest.mark.parametrize("apostrophe", ["\u2018", "\u2019", "\u201b", "\u02bc", "\uff07"])
+    def test_canonicalizes_apostrophes(self, apostrophe):
+        assert pp.normalize_unicode(f"won{apostrophe}t") == "won't"
+
     def test_normalized_text_lower(self):
         assert pp.normalized_text_lower("  HELLO World  ") == "hello world"
+
+    def test_smart_contractions_match_ascii_in_lowercase_views(self):
+        text = "You WON\u2019T believe this!"
+        assert pp.tokenize_lower(text) == ["you", "won't", "believe", "this"]
+        assert pp.normalized_text_lower(text) == "you won't believe this!"
 
 
 if __name__ == "__main__":

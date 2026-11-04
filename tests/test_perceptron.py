@@ -9,6 +9,9 @@ non-separable data, and guard its binary-only contract.
 
 from __future__ import annotations
 
+from decimal import Decimal
+from fractions import Fraction
+
 import numpy as np
 import pytest
 
@@ -166,6 +169,98 @@ class TestContract:
         model = AveragedPerceptron(max_epochs=20, random_state=0).fit(X, y2)
         assert set(np.unique(model.classes_)) == {-3, 5}
         assert set(np.unique(model.predict(X))).issubset({-3, 5})
+
+    @pytest.mark.parametrize("max_epochs", [0, -1, 1.5, True, "3", np.nan, np.inf])
+    def test_rejects_invalid_epoch_count(self, max_epochs):
+        with pytest.raises(ValueError, match="max_epochs"):
+            AveragedPerceptron(max_epochs=max_epochs).fit([[-1.0], [1.0]], [0, 1])
+
+    @pytest.mark.parametrize("rate", [0, -1, np.nan, np.inf, -np.inf, True, "1"])
+    def test_rejects_invalid_learning_rate(self, rate):
+        with pytest.raises(ValueError, match="learning_rate"):
+            AveragedPerceptron(learning_rate=rate).fit([[-1.0], [1.0]], [0, 1])
+
+    @pytest.mark.parametrize("X", [1.0, [-1.0, 1.0], [[[-1.0]], [[1.0]]]])
+    def test_rejects_non_matrix_features(self, X):
+        with pytest.raises(ValueError, match="2D"):
+            AveragedPerceptron().fit(X, [0, 1])
+
+    @pytest.mark.parametrize("X", [np.empty((0, 1)), np.empty((2, 0))])
+    def test_rejects_empty_training_matrix(self, X):
+        with pytest.raises(ValueError, match="at least one"):
+            AveragedPerceptron().fit(X, [0, 1])
+
+    @pytest.mark.parametrize("y", [[0], [0, 1, 0]])
+    def test_rejects_mismatched_training_samples(self, y):
+        with pytest.raises(ValueError, match="same number of samples"):
+            AveragedPerceptron().fit([[-1.0], [1.0]], y)
+
+    @pytest.mark.parametrize("bad_value", [np.nan, np.inf, -np.inf])
+    def test_rejects_nonfinite_training_features(self, bad_value):
+        with pytest.raises(ValueError, match="finite"):
+            AveragedPerceptron().fit([[bad_value], [1.0]], [0, 1])
+
+    @pytest.mark.parametrize("bad_label", [np.nan, np.inf, -np.inf, None])
+    def test_rejects_missing_or_nonfinite_labels(self, bad_label):
+        with pytest.raises(ValueError, match="labels"):
+            AveragedPerceptron().fit([[-1.0], [1.0]], [0, bad_label])
+
+    @pytest.mark.parametrize("bad_label", [np.nan, np.inf, -np.inf])
+    def test_rejects_nonfinite_labels_in_object_arrays(self, bad_label):
+        y = np.array([0, bad_label], dtype=object)
+        with pytest.raises(ValueError, match="finite labels"):
+            AveragedPerceptron().fit([[-1.0], [1.0]], y)
+
+    @pytest.mark.parametrize("labels", [
+        [2 ** 100, 2 ** 100 + 1],
+        [Decimal("0"), Decimal("1")],
+        [Fraction(0), Fraction(1)],
+    ])
+    def test_preserves_finite_object_numeric_labels(self, labels):
+        X = [[-1.0], [1.0]]
+        y = np.array(labels, dtype=object)
+        model = AveragedPerceptron().fit(X, y)
+        np.testing.assert_array_equal(model.predict(X), y)
+
+    def test_rejects_multioutput_labels(self):
+        with pytest.raises(ValueError, match="1D label array"):
+            AveragedPerceptron().fit([[-1.0], [1.0]], [[0, 1], [1, 0]])
+
+    def test_accepts_string_labels_and_single_column_targets(self):
+        X = [[-1.0], [1.0]]
+        model = AveragedPerceptron(max_epochs=np.int64(5)).fit(
+            X, [["news"], ["clickbait"]]
+        )
+        np.testing.assert_array_equal(model.predict(X), ["news", "clickbait"])
+        assert model.score(X, [["news"], ["clickbait"]]) == 1.0
+
+
+class TestPredictionValidation:
+    def test_rejects_prediction_before_fit(self):
+        with pytest.raises(ValueError, match="not fitted"):
+            AveragedPerceptron().predict([[1.0]])
+
+    @pytest.mark.parametrize("X", [[-1.0], [[-1.0, 1.0]], [[np.nan]], [[np.inf]]])
+    def test_rejects_invalid_prediction_features(self, X):
+        model = AveragedPerceptron().fit([[-1.0], [1.0]], [0, 1])
+        with pytest.raises(ValueError):
+            model.predict(X)
+
+    def test_empty_prediction_batch_preserves_shape(self):
+        model = AveragedPerceptron().fit([[-1.0], [1.0]], [0, 1])
+        X_empty = np.empty((0, 1))
+        assert model.predict(X_empty).shape == (0,)
+        assert model.decision_function(X_empty).shape == (0,)
+
+    def test_rejects_mismatched_scoring_labels(self):
+        model = AveragedPerceptron().fit([[-1.0], [1.0]], [0, 1])
+        with pytest.raises(ValueError, match="same number of samples"):
+            model.score([[-1.0], [1.0]], [0])
+
+    def test_rejects_empty_scoring_batch(self):
+        model = AveragedPerceptron().fit([[-1.0], [1.0]], [0, 1])
+        with pytest.raises(ValueError, match="at least one sample"):
+            model.score(np.empty((0, 1)), [])
 
 
 if __name__ == "__main__":

@@ -21,16 +21,26 @@ import unicodedata
 # punctuation are handled separately by the feature extractor.
 _WORD_RE = re.compile(r"[A-Za-z0-9]+(?:['\-][A-Za-z0-9]+)*")
 
+# NFKC leaves typographic apostrophes unchanged. Canonicalize these variants so
+# contractions match the same tokens and lexical phrases as straight quotes.
+_APOSTROPHE_TRANSLATION = str.maketrans({
+    "\u2018": "'",  # left single quotation mark
+    "\u2019": "'",  # right single quotation mark
+    "\u201b": "'",  # single high-reversed-9 quotation mark
+    "\u02bc": "'",  # modifier letter apostrophe
+})
+
 
 def normalize_unicode(text: str) -> str:
-    """Normalize to NFKC so visually identical characters compare equal."""
-    return unicodedata.normalize("NFKC", text)
+    """Apply NFKC and canonicalize apostrophes for consistent lexical matching."""
+    return unicodedata.normalize("NFKC", text).translate(_APOSTROPHE_TRANSLATION)
 
 
 def clean(text: str) -> str:
     """Trim surrounding whitespace and collapse internal runs of whitespace.
 
-    Casing and punctuation are intentionally preserved.
+    Casing and punctuation are intentionally preserved, with typographic
+    apostrophes represented by their ASCII equivalent.
     """
     text = normalize_unicode(str(text))
     return re.sub(r"\s+", " ", text).strip()

@@ -107,6 +107,10 @@ keeping the model linear and interpretable.
 
 ## Results
 
+The checked-in metrics, figures, and paper describe the original experiment,
+before the phrase-matching, apostrophe, and superlative corrections. Run
+`python main.py` to generate results for the current implementation.
+
 5-fold stratified cross-validation (perceptron): accuracy 0.9764 ± 0.0017,
 ROC-AUC 0.9973 ± 0.0003 — stable and leak-free (scaler re-fit per fold).
 
@@ -217,7 +221,7 @@ Useful flags: `--epochs`, `--test-size`, `--seed`, `--folds`.
 
 ```bash
 pip install pytest
-python -m pytest -q          # 85 tests
+python -m pytest -q
 ```
 
 Tests cover perceptron convergence on separable data, the binary-only contract,

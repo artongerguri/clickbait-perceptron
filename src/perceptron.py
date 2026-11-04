@@ -19,6 +19,8 @@ black-box baseline on equal footing.
 
 from __future__ import annotations
 
+from numbers import Integral, Number, Real
+
 import numpy as np
 
 
@@ -30,8 +32,9 @@ class AveragedPerceptron:
     max_epochs:
         Maximum number of passes over the training data.
     learning_rate:
-        Scale applied to each weight update. The Perceptron is scale-invariant
-        in its decision boundary, so this mostly affects convergence speed.
+        Positive scale applied to each weight update. From zero initialization,
+        this rescales the parameters without changing the decision boundary
+        (up to floating-point effects).
     shuffle:
         Whether to reshuffle the data each epoch (recommended for online
         learning to avoid ordering bias).
@@ -75,14 +78,29 @@ class AveragedPerceptron:
     # Training                                                           #
     # ------------------------------------------------------------------ #
     def fit(self, X: np.ndarray, y: np.ndarray) -> "AveragedPerceptron":
-        """Fit the model on features ``X`` and 0/1 labels ``y``."""
-        X = np.asarray(X, dtype=np.float64)
-        y = np.asarray(y).ravel()
-        self.classes_ = np.unique(y)
-        if self.classes_.size != 2:
+        """Fit on a finite 2D feature matrix and two distinct class labels."""
+        if (
+            isinstance(self.max_epochs, bool)
+            or not isinstance(self.max_epochs, Integral)
+            or self.max_epochs <= 0
+        ):
+            raise ValueError("max_epochs must be a positive integer.")
+        if (
+            isinstance(self.learning_rate, bool)
+            or not isinstance(self.learning_rate, Real)
+            or not np.isfinite(self.learning_rate)
+            or self.learning_rate <= 0
+        ):
+            raise ValueError("learning_rate must be a finite positive number.")
+
+        X = self._validate_X(X)
+        y = self._validate_y(y, X.shape[0])
+        classes = np.unique(y)
+        if classes.size != 2:
             raise ValueError("AveragedPerceptron supports binary classification only.")
 
         # Map the two class labels to {-1, +1} for the margin formulation.
+        self.classes_ = classes
         self._label_pos = self.classes_[1]
         self._label_neg = self.classes_[0]
         y_pm = np.where(y == self._label_pos, 1.0, -1.0)
@@ -157,21 +175,62 @@ class AveragedPerceptron:
     # ------------------------------------------------------------------ #
     def decision_function(self, X: np.ndarray) -> np.ndarray:
         """Signed distance-like score; ``> 0`` means the positive class."""
-        X = np.asarray(X, dtype=np.float64)
+        if not hasattr(self, "w_"):
+            raise ValueError("The model is not fitted. Call fit before prediction.")
+        X = self._validate_X(X, allow_empty=True)
+        if X.shape[1] != self.w_.size:
+            raise ValueError(f"X must have {self.w_.size} features; got {X.shape[1]}.")
         return X @ self.w_ + self.b_
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        """Predict original 0/1 class labels."""
+        """Predict the original class labels."""
         scores = self.decision_function(X)
-        return np.where(scores > 0.0, self._label_pos, self._label_neg)
+        return self.classes_[(scores > 0.0).astype(np.intp)]
 
     def score(self, X: np.ndarray, y: np.ndarray) -> float:
         """Mean accuracy on ``(X, y)``."""
-        return float(np.mean(self.predict(X) == np.asarray(y).ravel()))
+        predictions = self.predict(X)
+        if predictions.size == 0:
+            raise ValueError("Scoring requires at least one sample.")
+        labels = self._validate_y(y, predictions.size)
+        return float(np.mean(predictions == labels))
 
     # ------------------------------------------------------------------ #
     # Helpers                                                            #
     # ------------------------------------------------------------------ #
+    @staticmethod
+    def _validate_X(X: np.ndarray, *, allow_empty: bool = False) -> np.ndarray:
+        X = np.asarray(X, dtype=np.float64)
+        if X.ndim != 2:
+            raise ValueError("X must be a 2D feature matrix.")
+        if X.shape[1] == 0:
+            raise ValueError("X must contain at least one feature.")
+        if not allow_empty and X.shape[0] == 0:
+            raise ValueError("X must contain at least one sample.")
+        if not np.isfinite(X).all():
+            raise ValueError("X must contain only finite values.")
+        return X
+
+    @staticmethod
+    def _validate_y(y: np.ndarray, n_samples: int) -> np.ndarray:
+        y = np.asarray(y)
+        if y.ndim == 2 and y.shape[1] == 1:
+            y = y.ravel()
+        if y.ndim != 1:
+            raise ValueError("y must be a 1D label array or a single column.")
+        if y.size != n_samples:
+            raise ValueError("X and y must contain the same number of samples.")
+        if any(label is None for label in y):
+            raise ValueError("y must not contain missing labels.")
+        if np.issubdtype(y.dtype, np.number) and not np.isfinite(y).all():
+            raise ValueError("y must contain only finite labels.")
+        if y.dtype == object and any(
+            isinstance(label, Number) and (label != label or abs(label) == np.inf)
+            for label in y
+        ):
+            raise ValueError("y must contain only finite labels.")
+        return y
+
     @staticmethod
     def _accuracy_from_params(
         X: np.ndarray, y_pm: np.ndarray, w: np.ndarray, b: float

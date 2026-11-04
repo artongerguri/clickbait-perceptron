@@ -64,6 +64,10 @@ SUPERLATIVES = {
     "best", "worst", "most", "least", "greatest", "biggest", "smallest",
     "cutest", "funniest", "craziest", "hottest", "ever", "ultimate", "perfect",
     "hardest", "easiest", "coolest", "weirdest", "scariest", "saddest",
+    "tallest", "shortest", "longest", "largest", "highest", "lowest",
+    "oldest", "youngest", "newest", "latest", "earliest", "fastest", "slowest",
+    "strongest", "weakest", "richest", "poorest", "cheapest", "safest",
+    "happiest", "smartest", "prettiest", "ugliest", "strangest", "wildest",
 }
 
 SLANG = {
@@ -93,8 +97,8 @@ STOPWORDS = {
     "if", "when", "while", "all", "some", "no", "not",
 }
 
-# Curated multi-word clickbait triggers. Matched as lowercase substrings so that
-# surface variants ("you'll" vs "you will") are reasonably covered.
+# Curated clickbait triggers, matched at word boundaries after lowercasing.
+# Each distinct trigger contributes at most once, even if it appears repeatedly.
 CLICKBAIT_PHRASES = [
     "will make you", "won't believe", "wont believe", "you need to",
     "need to know", "here's", "here is", "here are", "this is why",
@@ -106,6 +110,16 @@ CLICKBAIT_PHRASES = [
     "blow your mind", "melt your heart", "should you", "which ", "that made",
     "in order of", "ranked", "that'll", "you probably", "you should",
     "that only", "tweets that", "pictures that", "photos that", "ever",
+]
+
+# Preserve trailing whitespace in entries such as "which ": that trigger needs
+# a following space, while boundaries prevent "ever" matching inside "every".
+_CLICKBAIT_PHRASE_PATTERNS = [
+    re.compile(
+        r"(?<!\w)" + re.escape(phrase)
+        + (r"(?!\w)" if not phrase[-1].isspace() else "")
+    )
+    for phrase in CLICKBAIT_PHRASES
 ]
 
 _YEAR_RE = re.compile(r"\b(?:19|20)\d{2}\b")
@@ -220,7 +234,7 @@ class FeatureExtractor:
         for h in headlines:
             p = _parse(h)
             rows.append([fn(p) for _, fn in self._registry])
-        return np.asarray(rows, dtype=np.float64)
+        return np.asarray(rows, dtype=np.float64).reshape(-1, self.n_features)
 
     # Convenience alias so the extractor is drop-in where a transform is wanted.
     __call__ = transform
@@ -268,7 +282,8 @@ class FeatureExtractor:
     # 4. Clickbait phrase lexicon
     @staticmethod
     def _clickbait_phrase_count(p: _Parsed) -> float:
-        return float(sum(phrase in p.lower for phrase in CLICKBAIT_PHRASES))
+        return float(sum(pattern.search(p.lower) is not None
+                         for pattern in _CLICKBAIT_PHRASE_PATTERNS))
 
     def _has_clickbait_phrase(self, p: _Parsed) -> float:
         return 1.0 if self._clickbait_phrase_count(p) > 0 else 0.0
@@ -289,15 +304,8 @@ class FeatureExtractor:
     # 6. Hyperbole
     @staticmethod
     def _superlative_count(p: _Parsed) -> float:
-        # Explicit lexicon plus a morphological "-est" heuristic (len > 4).
-        lex = sum(t in SUPERLATIVES for t in p.tokens_lc)
-        morph = sum(t.endswith("est") and len(t) > 4 for t in p.tokens_lc)
-        # Avoid double-counting words already in the lexicon.
-        morph_extra = sum(
-            t.endswith("est") and len(t) > 4 and t not in SUPERLATIVES
-            for t in p.tokens_lc
-        )
-        return float(lex + morph_extra)
+        # A bare "-est" suffix also occurs in words like "forest" and "arrest".
+        return float(sum(t in SUPERLATIVES for t in p.tokens_lc))
 
     @staticmethod
     def _intensifier_count(p: _Parsed) -> float:
