@@ -145,24 +145,54 @@ printed by `main.py` and stored in [`results/metrics.json`](results/metrics.json
 
 ## Project structure
 
-```
+```text
 clickbait-perceptron/
-├── data/clickbait_data.csv        # Stop Clickbait corpus (32k headlines)
+├── assets/
+│   └── up-logo.png                # university logo
+├── data/
+│   └── clickbait_data.csv          # Stop Clickbait corpus (32k headlines)
+├── docs/
+│   ├── paper.html                 # IEEE-style paper with print layout
+│   └── Perceptron-Based Text Classification for Detecting Clickbait Headlines.pdf
+├── results/                       # saved experiment outputs
+│   ├── feature_weights.csv        # ranked perceptron feature weights
+│   ├── metrics.json               # configuration, metrics, and explanations
+│   ├── run_log.txt                # saved console output from a pipeline run
+│   └── figures/
+│       ├── class_feature_means.png # feature averages by class
+│       ├── confusion_baseline.png
+│       ├── confusion_perceptron.png
+│       ├── convergence.png         # training progress
+│       ├── feature_weights.png
+│       └── roc_curves.png          # perceptron and baseline comparison
 ├── src/
-│   ├── preprocessing.py           # casing/punctuation-preserving cleaning
-│   ├── features.py                # 33 interpretable features (the core)
-│   ├── perceptron.py              # averaged perceptron, from scratch
-│   ├── baselines.py               # TF-IDF + Logistic Regression (black box)
-│   ├── data_loader.py             # load + stratified split
-│   ├── evaluate.py                # metrics, cross-validation, figures
-│   ├── interpret.py               # weight ranking + per-headline explanations
-│   └── plotting_style.py          # shared, colorblind-safe figure style
-├── tests/                         # 85 pytest tests (perceptron/features/pipeline)
-├── results/                       # metrics.json, feature_weights.csv, figures/
-├── docs/                          # IEEE-format paper (cover + two columns) + PDF
-├── main.py                        # end-to-end pipeline (9 stages)
-└── requirements.txt
+│   ├── __init__.py                # source package marker
+│   ├── baselines.py               # TF-IDF + Logistic Regression baseline
+│   ├── data_loader.py             # CSV loading and stratified train/test split
+│   ├── evaluate.py                # metrics, cross-validation, evaluation plots
+│   ├── features.py                # 33 interpretable linguistic features
+│   ├── interpret.py               # weight ranking and headline explanations
+│   ├── perceptron.py              # vanilla and averaged perceptron in NumPy
+│   ├── plotting_style.py          # shared, colorblind-safe figure style
+│   └── preprocessing.py           # casing/punctuation-preserving cleaning
+├── tests/
+│   ├── __init__.py                # test package marker
+│   ├── conftest.py                # project import path setup for pytest
+│   ├── test_features.py           # feature extraction and edge cases
+│   ├── test_perceptron.py         # training, predictions, and model contract
+│   ├── test_pipeline.py           # evaluation, interpretation, baseline, plots
+│   └── test_preprocessing.py      # text cleaning and tokenization
+├── .gitignore                     # Python, environment, and editor exclusions
+├── LICENSE                        # MIT license
+├── main.py                        # command-line entry point for the pipeline
+├── README.md                      # project overview and usage
+└── requirements.txt               # runtime and test dependencies
 ```
+
+[`main.py`](main.py) loads the dataset from `data/`, runs the components in
+`src/`, and writes metrics, feature weights, and figures to `results/`.
+The saved results are tracked in the repository; `docs/` contains the paper's
+HTML source and PDF version.
 
 ## Installation & usage
 
