@@ -22,3 +22,6 @@ Thumbs.db
 
 # Logs (results/ figures & metrics are tracked intentionally)
 *.log
+
+# Personal study notes (local only)
+/.private/
