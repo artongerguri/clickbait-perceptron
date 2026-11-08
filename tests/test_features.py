@@ -14,7 +14,7 @@ import pytest
 
 from src.features import FeatureExtractor
 
-EXPECTED_N_FEATURES = 33
+EXPECTED_N_FEATURES = 32
 
 
 @pytest.fixture(scope="module")
@@ -275,7 +275,8 @@ class TestRegisterAffectFunction:
         d = fx.extract_one("An Amazing And Shocking Story")
         assert d["positive_word_count"] == 1.0   # amazing
         assert d["negative_word_count"] == 1.0   # shocking
-        assert d["emotional_word_count"] == 2.0
+        # The aggregate was exactly redundant with these two retained counts.
+        assert "emotional_word_count" not in d
 
     def test_stopword_ratio_bounds(self, fx):
         r = value(fx, "the of a and in", "stopword_ratio")

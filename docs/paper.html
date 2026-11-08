@@ -1,415 +1,214 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Perceptron-Based Clickbait Detection — IEEE Paper</title>
+<title>Perceptron-Based Text Classification for Detecting Clickbait Headlines</title>
 <style>
-  :root {
-    --ink: #111;
-    --muted: #444;
-    --rule: #999;
-    --link: #1a4a8a;
-  }
-  * { box-sizing: border-box; }
-  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  body {
-    font-family: "Times New Roman", Times, Georgia, serif;
-    color: var(--ink);
-    background: #f3f3f1;
-    margin: 0;
-    line-height: 1.32;
-  }
-  /* --- paged look on screen --- */
-  .page {
-    background: #fff;
-    width: 210mm;
-    min-height: 297mm;
-    margin: 10mm auto;
-    padding: 20mm 18mm;
-    box-shadow: 0 2px 14px rgba(0,0,0,.18);
-  }
-
-  /* ============== COVER ============== */
-  .cover { text-align: center; }
-  .cover .logo { width: 108px; height: auto; margin: 6mm auto 7mm; display: block; }
-  .cover h1.univ {
-    font-size: 25pt; font-weight: 700; margin: 0 0 2mm; letter-spacing: .3px;
-  }
-  .cover .rule { border: none; border-top: 1px solid var(--rule); margin: 4mm 0; }
-  .cover .faculty { font-size: 13.5pt; font-weight: 700; margin: 0 0 3mm; }
-  .cover .meta { font-size: 10.5pt; color: var(--muted); margin: 1mm 0; }
-  .cover .meta b { color: var(--ink); }
-  .cover .title-block { margin: 12mm 0; }
-  .cover h2.ptitle {
-    font-size: 19pt; font-weight: 700; margin: 0; line-height: 1.25;
-  }
-  .cover h2.ptitle .sub { display:block; font-size: 13pt; font-weight: 400; color: var(--muted); margin-top: 3mm; }
-  .cover .role { font-size: 13pt; font-weight: 700; margin: 9mm 0 2mm; }
-  .cover .names { font-size: 11pt; color: var(--muted); }
-  .cover .names div { margin: 1mm 0; }
-  .cover .foot { margin-top: 16mm; font-size: 10pt; color: var(--muted); }
-
-  /* ============== PAPER BODY ============== */
-  .paper-head { text-align: center; margin-bottom: 6mm; }
-  .paper-head h1 {
-    font-size: 19pt; font-weight: 700; margin: 0 0 4mm; line-height: 1.22;
-  }
-  .authors { font-size: 11pt; }
-  .authors .nm { font-variant: small-caps; font-size: 12pt; }
-  .authors .aff { font-size: 9.5pt; color: var(--muted); font-style: italic; }
-
-  .abstract { font-size: 9.5pt; margin: 5mm 4mm 2mm; text-align: justify; }
-  .abstract b, .keywords b { font-style: italic; }
-  .keywords { font-size: 9.5pt; margin: 0 4mm 6mm; text-align: justify; }
-
-  .cols { column-count: 2; column-gap: 7mm; font-size: 10pt; text-align: justify; }
-  .cols h3 {
-    text-align: center; font-size: 10.5pt; font-variant: small-caps;
-    font-weight: 700; margin: 5mm 0 2mm; break-after: avoid;
-  }
-  .cols h4 { font-size: 10pt; font-style: italic; font-weight: 700; margin: 3.5mm 0 1.5mm; break-after: avoid; }
-  .cols p { margin: 0 0 2.4mm; }
-  .cols p.ind { text-indent: 4mm; }
-
-  figure { margin: 3mm 0; break-inside: avoid; text-align: center; }
-  figure img { max-width: 100%; height: auto; border: 1px solid #e3e3e0; }
-  figcaption { font-size: 8.5pt; color: var(--muted); margin-top: 1.5mm; text-align: left; }
-  figure.span { column-span: all; }
-
-  table.tbl { width: 100%; border-collapse: collapse; font-size: 8.6pt; margin: 2mm 0 1mm; break-inside: avoid; }
-  table.tbl caption { caption-side: top; font-size: 8.6pt; font-variant: small-caps; font-weight: 700; margin-bottom: 1.5mm; }
-  table.tbl th, table.tbl td { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 1.2mm 1.6mm; text-align: center; }
-  table.tbl thead th { border-bottom: 1px solid #000; }
-  table.tbl td.l, table.tbl th.l { text-align: left; }
-  .best { font-weight: 700; }
-
-  ol.refs { font-size: 8.6pt; padding-left: 7mm; margin: 2mm 0 0; }
-  ol.refs li { margin-bottom: 1.4mm; text-align: justify; }
-
-  a { color: var(--link); text-decoration: none; }
-
-  /* ============== PRINT ============== */
-  @media print {
-    body { background: #fff; }
-    .page { width: auto; min-height: auto; margin: 0; padding: 0; box-shadow: none; }
-    .cover { page-break-after: always; padding-top: 10mm; }
-    @page { size: A4; margin: 16mm 15mm; }
-    .no-print { display: none; }
-  }
-  .hint {
-    max-width: 210mm; margin: 10mm auto 0; padding: 10px 16px; font-family: Arial, sans-serif;
-    font-size: 12px; color: #333; background: #fff8dc; border: 1px solid #e6d98a; border-radius: 6px;
-  }
+:root{--ink:#161616;--muted:#505050;--rule:#aaa;--link:#244970}
+*{box-sizing:border-box}html{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+body{margin:0;background:#eeefed;color:var(--ink);font-family:"Times New Roman",Times,serif;line-height:1.3}
+.page{position:relative;width:210mm;min-height:297mm;margin:9mm auto;padding:14mm 15mm 17mm;background:#fff;box-shadow:0 2px 12px #0002}
+.running{display:flex;justify-content:space-between;border-bottom:.3mm solid var(--rule);padding-bottom:2mm;margin-bottom:5mm;color:var(--muted);font-size:8pt;letter-spacing:.2pt}
+.paper-head{text-align:center;margin-bottom:5mm}h1{font-size:18.5pt;line-height:1.17;margin:0 0 4mm}
+.authors{font-size:11pt}.aff{display:block;margin-top:1.3mm;font-size:9pt;font-style:italic;color:var(--muted)}
+.abstract{font-size:9.5pt;text-align:justify;margin:4mm 2mm 2.5mm}.keywords{font-size:9pt;margin:0 2mm 5mm;text-align:justify}
+.cols{column-count:2;column-gap:7mm;font-size:9.3pt;text-align:justify}.cols p,.text p{margin:0 0 2.3mm}
+h2{font-size:11pt;font-variant:small-caps;text-align:center;margin:3.5mm 0 3mm;break-after:avoid}h2.first{margin-top:0}
+h3{font-size:9.8pt;font-style:italic;margin:3mm 0 1.6mm;break-after:avoid}.text{font-size:9.6pt;text-align:justify}
+.tbl{width:100%;border-collapse:collapse;margin:3mm 0 2mm;font-size:9pt;break-inside:avoid}
+.tbl caption{caption-side:top;font-size:9pt;text-align:left;font-weight:700;margin-bottom:2mm}
+.tbl th{border-top:.3mm solid #222;border-bottom:.2mm solid #777}
+.tbl td,.tbl th{padding:1.5mm 1.7mm;text-align:right;vertical-align:top}.tbl tbody tr:last-child td{border-bottom:.3mm solid #222}.tbl .l{text-align:left}
+.compact{font-size:8.3pt}.compact td,.compact th{padding:1.2mm 1.2mm}
+figure{margin:4mm 0;break-inside:avoid;text-align:center}figure img{max-width:100%;height:auto;display:block;margin:auto}
+figcaption{font-size:8.7pt;text-align:justify;margin-top:2mm;color:var(--muted)}
+.convergence img{width:146mm}.robustness img{width:150mm}.weights{margin-top:3mm}.weights img{width:151mm}
+.refs{font-size:8.2pt;line-height:1.28;margin:2mm 0;padding-left:5mm}.refs li{padding-left:.6mm;margin-bottom:2.3mm;overflow-wrap:anywhere}
+code{font-family:Consolas,"Courier New",monospace;font-size:.85em;overflow-wrap:anywhere}a{color:var(--link);text-decoration:none}
+.footer{position:absolute;left:15mm;right:15mm;bottom:10mm;display:flex;justify-content:space-between;border-top:.2mm solid #bbb;padding-top:2mm;font-size:8pt;color:var(--muted)}
+.hint{max-width:210mm;margin:8mm auto 0;padding:10px 14px;background:#fff;border:1px solid #d6d7d2;font:12px/1.4 Arial,sans-serif}
+@media print{@page{size:A4;margin:14mm 15mm}body{background:#fff}.hint{display:none}.page{width:180mm;height:268mm;min-height:0;padding:0 0 10mm;margin:0;box-shadow:none;break-after:page}.page:last-child{break-after:auto}.footer{left:0;right:0;bottom:0}}
 </style>
 </head>
 <body>
+<div class="hint">Research paper synchronized with <code>results/metrics.json</code>. Export with A4 paper, CSS page margins, background graphics enabled, and browser headers and footers disabled.</div>
 
-<div class="hint no-print">
-  <b>Export to PDF:</b> open this file in a browser and choose <b>Print → Save as PDF</b> (A4, margins “Default”, “Background graphics” ON).
-</div>
-
-<!-- =================== PAPER =================== -->
 <section class="page">
-  <div class="paper-head">
-    <h1>Perceptron-Based Text Classification for Detecting Clickbait Headlines</h1>
-    <div class="authors">
-      <span class="nm">Arton Gërguri</span> and <span class="nm">Jon Klinaku</span><br>
-      <span class="aff">Faculty of Electrical and Computer Engineering, University of Prishtina, Kosovo</span>
-    </div>
-  </div>
-
-  <div class="abstract">
-    <b>Abstract—</b> Clickbait headlines exploit curiosity gaps to attract clicks at
-    the expense of informativeness, degrading the online news experience. While
-    recent detectors rely on opaque neural networks, we revisit the problem from an
-    <i>interpretability-first</i> angle. We implement an averaged perceptron entirely
-    from scratch and feed it a compact set of 33 hand-engineered lexical and
-    stylistic features, each encoding a linguistically motivated cue (listicle
-    numerals, reader address, curiosity phrases, interrogative structure, hyperbole,
-    punctuation, capitalization style and affect). On the 32,000-headline
-    <i>Stop Clickbait</i> corpus, the model attains 97.56% test accuracy and
-    0.9971 ROC-AUC, <i>surpassing</i> a strong black-box TF-IDF + Logistic
-    Regression baseline (96.89%) while using roughly 600× fewer, fully named
-    features. Because the classifier is linear over standardized inputs, each weight
-    is a direct, signed measure of how strongly a cue signals clickbait, letting us
-    rank the most decisive linguistic markers and explain individual predictions.
-    The result shows that transparent feature-based learning remains competitive
-    with, and complementary to, black-box detectors.
-  </div>
-  <div class="keywords">
-    <b>Index Terms—</b> clickbait detection, perceptron, text classification,
-    feature engineering, interpretable machine learning, natural language processing.
-  </div>
-
-  <div class="cols">
-
-    <h3>I.&nbsp;&nbsp;Introduction</h3>
-    <p>Online publishers compete for attention, and a common tactic is the
-    <i>clickbait</i> headline: a phrasing engineered to open a "curiosity gap" the
-    reader can close only by clicking, often without delivering proportional
-    information. At scale, clickbait erodes trust and distorts the incentives of
-    digital journalism, which motivates automatic detection as a content-quality and
-    recommendation-filtering problem.</p>
-
-    <p class="ind">State-of-the-art detectors increasingly use deep neural networks
-    over learned word or character embeddings. These models are accurate but
-    <i>opaque</i>: they offer little insight into <i>which</i> linguistic properties
-    make a headline clickbait. For an editorial or media-literacy setting, that
-    explanation is often as valuable as the label itself.</p>
-
-    <p class="ind">This paper takes the opposite, interpretability-first stance. We
-    ask how far a <i>linear</i> model driven by a small set of transparent,
-    hand-crafted features can go. Concretely, our contributions are:</p>
-    <p>(1) an <b>averaged perceptron implemented from scratch</b> in NumPy, including
-    the efficient weight-averaging trick and explicit convergence tracking;
-    (2) a bank of <b>33 interpretable lexical/stylistic features</b> spanning twelve
-    linguistic families; (3) a controlled <b>comparison against a black-box</b>
-    TF-IDF + Logistic Regression baseline on equal footing; and (4) an
-    <b>interpretability analysis</b> that ranks the cues most predictive of clickbait
-    and decomposes individual predictions into per-feature contributions.</p>
-
-    <p class="ind">Our central finding is that the interpretable model is not merely
-    competitive but marginally <i>better</i> than the opaque baseline, while exposing
-    the cues it relies on — supporting the view that feature-based learning
-    complements, rather than is superseded by, neural detectors.</p>
-
-    <h3>II.&nbsp;&nbsp;Related Work</h3>
-    <p>Chakraborty <i>et al.</i> introduced the <i>Stop Clickbait</i> corpus and an
-    SVM over hand-crafted features, establishing feature-based clickbait detection
-    as a strong baseline [1]. Potthast <i>et al.</i> framed clickbait detection for
-    social media and organized the Clickbait Challenge [5], while Biyani
-    <i>et al.</i> emphasized article <i>informality</i> as a signal [6]. Anand
-    <i>et al.</i> later applied recurrent and character-level neural networks,
-    trading interpretability for representational power [7].</p>
-    <p class="ind">Methodologically we build on the classical perceptron
-    [2] and, in particular, its averaged/voted variant, which markedly improves
-    generalization at negligible cost [3]; averaged perceptrons are a staple of
-    discriminative NLP [4]. Our work differs by treating the <i>interpretability of
-    the learned weights</i> as a first-class objective rather than a by-product, and
-    by benchmarking the transparent model directly against a high-dimensional
-    black-box on the same split.</p>
-
-    <h3>III.&nbsp;&nbsp;Dataset</h3>
-    <p>We use the <i>Stop Clickbait</i> corpus [1]: 32,000 English headlines labelled
-    <i>clickbait</i> (1) or <i>not clickbait</i> (0). The clickbait side is drawn from
-    outlets such as BuzzFeed and Upworthy; the non-clickbait side from mainstream
-    agencies (e.g., The New York Times, The Guardian, Reuters/WikiNews). The classes
-    are almost perfectly balanced (15,999 vs. 16,001), so accuracy is a meaningful
-    headline metric. Headlines average 9.07 words (range 1–26). We hold out a
-    stratified 20% test set (25,600 train / 6,400 test) with a fixed seed for
-    reproducibility.</p>
-
-    <h3>IV.&nbsp;&nbsp;Methodology</h3>
-    <h4>A. Preprocessing</h4>
-    <p>Unlike typical pipelines, we deliberately <i>preserve</i> original casing and
-    punctuation, because capitalization style (Title Case vs. sentence case) and
-    marks such as "!", "?" and "…" are themselves strong stylistic cues. Cleaning is
-    limited to Unicode NFKC normalization and whitespace collapsing; lowercasing is
-    applied only where a case-insensitive lexical match is required.</p>
-
-    <h4>B. Engineered features</h4>
-    <p>Each headline is mapped to a 33-dimensional vector of named features grouped
-    into twelve families (Table I): numeric/listicle cues, reader address
-    (second-/first-person), forward reference (cataphora), a curated clickbait-phrase
-    lexicon, interrogative structure, hyperbole (superlatives/intensifiers),
-    punctuation style, length statistics, capitalization, informal register (slang),
-    affect lexicons, and function-word ratio. A name→function registry guarantees the
-    feature matrix and the feature names can never drift out of sync.</p>
-
-    <table class="tbl">
-      <caption>Table I — Feature families (33 features total)</caption>
-      <thead><tr><th class="l">Family</th><th class="l">Example features</th></tr></thead>
-      <tbody>
-        <tr><td class="l">Numeric / listicle</td><td class="l">starts_with_number, contains_year</td></tr>
-        <tr><td class="l">Reader address</td><td class="l">second_person_count, first_person_count</td></tr>
-        <tr><td class="l">Forward reference</td><td class="l">demonstrative_count, has_forward_reference</td></tr>
-        <tr><td class="l">Clickbait phrases</td><td class="l">clickbait_phrase_count</td></tr>
-        <tr><td class="l">Interrogative</td><td class="l">is_question, starts_with_question_word</td></tr>
-        <tr><td class="l">Hyperbole</td><td class="l">superlative_count, intensifier_count</td></tr>
-        <tr><td class="l">Punctuation</td><td class="l">exclamation_count, has_ellipsis</td></tr>
-        <tr><td class="l">Length</td><td class="l">word_count, avg_word_length</td></tr>
-        <tr><td class="l">Capitalization</td><td class="l">title_case_ratio, all_caps_ratio</td></tr>
-        <tr><td class="l">Informal register</td><td class="l">slang_count</td></tr>
-        <tr><td class="l">Affect</td><td class="l">positive/negative/emotional counts</td></tr>
-        <tr><td class="l">Function words</td><td class="l">stopword_ratio</td></tr>
-      </tbody>
-    </table>
-
-    <p class="ind">Before training, features are standardized (zero mean, unit
-    variance). Standardization is essential for <i>interpretation</i>: it puts every
-    weight on a common scale so that weight magnitude is comparable across features.
-    To avoid leakage, the scaler is fit on the training fold only.</p>
-
-    <h4>C. Averaged perceptron</h4>
-    <p>The perceptron is an online, mistake-driven linear classifier. With labels
-    mapped to {−1,+1}, for each example (x, y) it predicts ŷ = sign(w·x + b) and, on
-    a mistake (y(w·x + b) ≤ 0), updates w ← w + ηy x and b ← b + ηy. We use the
-    <i>averaged</i> variant [3], which predicts with the mean of all intermediate
-    weight vectors rather than the last. Averaging sharply reduces variance and
-    improves generalization while keeping the model linear and interpretable. We
-    implement it with the efficient cached-accumulator trick (a single running sum
-    instead of storing every iterate), and detect convergence as a full pass with
-    zero updates.</p>
-
-    <h4>D. Black-box baseline</h4>
-    <p>As a strong opaque opponent we use TF-IDF over word 1–2 grams (sublinear term
-    frequency, up to 20,000 features) feeding an L2-regularized Logistic Regression.
-    This is the canonical high-dimensional text baseline: accurate but with no
-    per-feature linguistic meaning, in contrast to our 33 named cues.</p>
-
-    <h3>V.&nbsp;&nbsp;Experimental Setup</h3>
-    <p>Both models are trained on the same stratified split and evaluated with
-    accuracy, precision, recall, F1 and ROC-AUC. We additionally run 5-fold
-    stratified cross-validation for the perceptron (scaler re-fit per fold) and
-    verify our implementation against (i) the vanilla (non-averaged) perceptron and
-    (ii) scikit-learn's <span style="font-style:italic">Perceptron</span>. All runs
-    use a fixed seed (42); 33-feature extraction takes ≈86&nbsp;µs/headline and
-    training ≈2.4&nbsp;s.</p>
-
-    <figure class="span">
-      <img src="../results/figures/convergence.png" alt="Convergence curves">
-      <figcaption>Fig. 1. Training convergence of the averaged perceptron: training
-      accuracy (left) and weight updates/mistakes per epoch (right).</figcaption>
-    </figure>
-
-    <h3>VI.&nbsp;&nbsp;Results and Discussion</h3>
-    <p>Table II reports held-out test performance. The averaged perceptron reaches
-    <b>97.56%</b> accuracy and <b>0.9971</b> ROC-AUC, <i>outperforming</i> the
-    black-box baseline (96.89%, 0.9957) despite using 33 features versus 20,000.
-    Five-fold cross-validation confirms stability: 97.64% ± 0.17 accuracy and
-    0.9973 ± 0.0003 AUC.</p>
-
-    <table class="tbl">
-      <caption>Table II — Held-out test performance (6,400 headlines)</caption>
-      <thead>
-        <tr><th class="l">Model</th><th>Feat.</th><th>Acc.</th><th>Prec.</th><th>Rec.</th><th>F1</th><th>AUC</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="l">Avg. perceptron <span style="font-style:italic">(ours)</span></td>
-          <td>33</td><td class="best">.9756</td><td class="best">.9777</td>
-          <td class="best">.9734</td><td class="best">.9756</td><td class="best">.9971</td>
-        </tr>
-        <tr>
-          <td class="l">TF-IDF + LogReg</td>
-          <td>20k</td><td>.9689</td><td>.9741</td><td>.9634</td><td>.9687</td><td>.9957</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <table class="tbl">
-      <caption>Table III — Implementation verification (test accuracy)</caption>
-      <thead><tr><th class="l">Variant</th><th>Accuracy</th></tr></thead>
-      <tbody>
-        <tr><td class="l">Vanilla perceptron (last weights)</td><td>.9700</td></tr>
-        <tr><td class="l">Averaged perceptron (ours)</td><td class="best">.9756</td></tr>
-        <tr><td class="l">scikit-learn Perceptron</td><td>.9670</td></tr>
-      </tbody>
-    </table>
-
-    <p class="ind">Table III isolates the effect of averaging: it adds ≈0.6 accuracy
-    points over the vanilla variant and edges out scikit-learn's reference
-    implementation, validating our from-scratch code. The confusion matrices
-    (Fig. 2) show the perceptron makes both fewer false positives (71 vs. 82) and
-    fewer false negatives (85 vs. 117) than the baseline.</p>
-
-    <figure>
-      <img src="../results/figures/confusion_perceptron.png" alt="Confusion matrix perceptron">
-      <figcaption>Fig. 2. Confusion matrix of the averaged perceptron on the test set.</figcaption>
-    </figure>
-
-    <figure>
-      <img src="../results/figures/roc_curves.png" alt="ROC curves">
-      <figcaption>Fig. 3. ROC curves: the interpretable perceptron slightly dominates
-      the black-box baseline across operating points.</figcaption>
-    </figure>
-
-    <h3>VII.&nbsp;&nbsp;Interpretability Analysis</h3>
-    <p>Because the model is linear over standardized features, the learned weights
-    are directly readable (Fig. 4). The strongest <i>clickbait</i> signals are
-    <span style="font-style:italic">title_case_ratio</span> (every word capitalized,
-    BuzzFeed-style), <span style="font-style:italic">clickbait_phrase_count</span>
-    (curiosity triggers such as "will make you", "you won't believe"),
-    <span style="font-style:italic">starts_with_auxiliary</span> ("Can you guess…"),
-    quotation marks, internet slang, and listicle numerals. The strongest
-    <i>legitimate-news</i> signals are a trailing question mark on genuine questions,
-    greater headline length in characters, and forward-reference/second-person
-    absence.</p>
-
-    <figure class="span">
-      <img src="../results/figures/feature_weights.png" alt="Feature weights">
-      <figcaption>Fig. 4. Signed perceptron weights (standardized space). Red pushes
-      toward clickbait, blue toward legitimate news.</figcaption>
-    </figure>
-
-    <p class="ind">Two apparent paradoxes are instructive. First,
-    <span style="font-style:italic">clickbait_phrase_count</span> has a large positive
-    weight while its binary counterpart
-    <span style="font-style:italic">has_clickbait_phrase</span> is negative; together
-    these correlated features encode a mild non-linearity (the <i>number</i> of
-    triggers matters more than mere presence). Second,
-    <span style="font-style:italic">is_question</span> is negative yet
-    <span style="font-style:italic">starts_with_question_word</span> is positive:
-    quiz-style clickbait ("Which Disney Princess Are You…") opens with a question word
-    but rarely ends in "?", whereas hard-news questions do. The model thus learns a
-    fine-grained interrogative distinction rather than a blanket rule. Per-headline
-    decomposition (contribution = standardized value × weight) lets us explain single
-    predictions, e.g. the dominant driver of "17 Things Only People Who Love Coffee
-    Will Understand" is its all-capitalized title case and listicle numeral.</p>
-
-    <h3>VIII.&nbsp;&nbsp;Limitations</h3>
-    <p>The dominance of <span style="font-style:italic">title_case_ratio</span> partly
-    reflects a <i>house-style</i> artifact of the corpus (clickbait sources capitalize
-    every word; news agencies use sentence case). A model trained here may therefore
-    learn source style as much as intrinsic clickbaitiness, which could reduce
-    transfer to outlets with different conventions. The lexicons are English- and
-    period-specific, and headline-only features ignore article content. Robust
-    deployment would require cross-source evaluation and periodic lexicon updates.</p>
-
-    <h3>IX.&nbsp;&nbsp;Conclusion</h3>
-    <p>We showed that an averaged perceptron over 33 interpretable features matches
-    and slightly exceeds a 20,000-feature black-box baseline for clickbait detection,
-    while making its reasoning transparent: the weights rank the linguistic cues that
-    signal clickbait, and individual predictions can be decomposed into per-feature
-    contributions. Interpretable, feature-based learning thus remains a valuable
-    complement to opaque neural detectors. Future work includes cross-source
-    generalization tests, learned phrase features, and hybrid models that attach the
-    same interpretable features to a neural backbone.</p>
-
-    <h3>References</h3>
-    <ol class="refs">
-      <li>A. Chakraborty, B. Paranjape, S. Kakarla, and N. Ganguly, "Stop Clickbait:
-        Detecting and preventing clickbaits in online news media," in <i>Proc.
-        IEEE/ACM Int. Conf. Advances in Social Networks Analysis and Mining
-        (ASONAM)</i>, 2016, pp. 9–16.</li>
-      <li>F. Rosenblatt, "The perceptron: A probabilistic model for information
-        storage and organization in the brain," <i>Psychological Review</i>, vol. 65,
-        no. 6, pp. 386–408, 1958.</li>
-      <li>Y. Freund and R. E. Schapire, "Large margin classification using the
-        perceptron algorithm," <i>Machine Learning</i>, vol. 37, no. 3, pp. 277–296,
-        1999.</li>
-      <li>M. Collins, "Discriminative training methods for hidden Markov models:
-        Theory and experiments with perceptron algorithms," in <i>Proc. EMNLP</i>,
-        2002, pp. 1–8.</li>
-      <li>M. Potthast, S. Köpsel, B. Stein, and M. Hagen, "Clickbait detection," in
-        <i>Proc. European Conf. Information Retrieval (ECIR)</i>, 2016, pp. 810–817.</li>
-      <li>P. Biyani, K. Tsioutsiouliklis, and J. Blackmer, "'8 Amazing secrets for
-        getting more clicks': Detecting clickbaits in news streams using article
-        informality," in <i>Proc. AAAI</i>, 2016, pp. 94–100.</li>
-      <li>A. Anand, T. Chakraborty, and N. Park, "We used neural networks to detect
-        clickbaits: You won't believe what happened next!," in <i>Proc. ECIR</i>,
-        2017, pp. 541–547.</li>
-      <li>F. Pedregosa <i>et al.</i>, "Scikit-learn: Machine learning in Python,"
-        <i>J. Machine Learning Research</i>, vol. 12, pp. 2825–2830, 2011.</li>
-      <li>C. D. Manning, P. Raghavan, and H. Schütze, <i>Introduction to Information
-        Retrieval</i>. Cambridge, U.K.: Cambridge Univ. Press, 2008.</li>
-      <li>H. Daumé III, <i>A Course in Machine Learning</i>, 2017. [Online].
-        Available: http://ciml.info</li>
-    </ol>
-
-  </div>
+<div class="running"><span>Clickbait detection with named linguistic features</span><span>Reproducible in-corpus benchmark</span></div>
+<header class="paper-head">
+<h1>Perceptron-Based Text Classification for Detecting Clickbait Headlines</h1>
+<div class="authors">Arton G&euml;rguri and Jon Klinaku<span class="aff">Faculty of Electrical and Computer Engineering, University of Prishtina, Kosovo</span></div>
+</header>
+<div class="abstract"><b><i>Abstract - </i></b>We study clickbait detection with an averaged perceptron implemented from scratch and 32 named lexical and stylistic features. On 6,400 test headlines from the 32,000-headline <i>Stop Clickbait</i> corpus, it achieves 97.50% accuracy and 0.9969 ROC-AUC. Logistic regression on the same features achieves 97.59% accuracy; a TF-IDF logistic-regression reference achieves 96.89%. Paired five-fold validation within the training partition gives similar performance for the two engineered-feature classifiers. Controlled perturbations expose substantial capitalization dependence: the full perceptron falls to 50.17% accuracy on sentence-cased test headlines, while a model without casing features remains at 90.89%. Standardized coefficients and additive score explanations make the fitted rule inspectable, but correlated inputs and fold-dependent signs constrain broader linguistic conclusions. The benchmark demonstrates compact linear classification while identifying typography sensitivity as its central generalization concern.</div>
+<div class="keywords"><b><i>Index Terms - </i></b>clickbait detection, averaged perceptron, feature engineering, linear classification, interpretability, robustness.</div>
+<div class="cols">
+<h2 class="first">I. Introduction</h2>
+<p>Clickbait headlines invite attention through curiosity, exaggeration, reader address, or withheld information. Detecting these cues is a useful text-classification exercise, but a high benchmark score alone does not establish that a model understands them. Publisher typography can provide an easier shortcut.</p>
+<p>This project asks how well a small, named feature representation classifies this corpus, and what inspection reveals about dependence on that representation. The goal is a reproducible implementation whose inputs, updates, and prediction scores can be examined directly.</p>
+<p>Our contributions are an averaged perceptron in NumPy; 32 linguistic and stylistic features; a classifier control using identical inputs; paired validation against a word/ngram baseline; and capitalization and coefficient-stability diagnostics. We compare linear models, without a neural benchmark or a state-of-the-art claim.</p>
+<h2>II. Background and Dataset</h2>
+<p>Chakraborty <i>et al.</i> introduced <i>Stop Clickbait</i> and demonstrated feature-based detection [1]. Our classifier follows the perceptron tradition [2], with averaging motivated by voted and averaged perceptrons [3, 4]. The contribution here is the implementation and controlled evaluation, rather than a new learning algorithm.</p>
+<p>The local CSV contains 32,000 English headlines: 15,999 clickbait and 16,001 non-clickbait examples. Headlines average 9.07 whitespace-delimited words (range 1-26). A stratified split with seed 42 yields 25,600 training and 6,400 test examples. The test partition has 3,200 examples of each class.</p>
+<p>The CSV provides text and labels, without publisher identifiers or timestamps. We therefore cannot measure cross-publisher or temporal generalization. Earlier development has examined this corpus; the test scores remain exploratory in-corpus measurements.</p>
+<h2>III. Feature Representation</h2>
+<p>Each headline becomes a 32-dimensional vector (Table I). Unicode NFKC normalization, whitespace collapsing, and apostrophe canonicalization precede matching. Original casing and punctuation are retained. Lexical cues use case-insensitive matching; phrase boundaries prevent <i>ever</i> from matching inside <i>every</i>.</p>
+<table class="tbl compact">
+<caption>Table I. Twelve feature families, 32 features</caption>
+<thead><tr><th class="l">Family</th><th class="l">Examples</th></tr></thead>
+<tbody>
+<tr><td class="l">Numeric / listicle</td><td class="l">Numeric onset, number counts, year</td></tr>
+<tr><td class="l">Reader address</td><td class="l">First- and second-person counts</td></tr>
+<tr><td class="l">Forward reference</td><td class="l">Demonstratives, reference presence</td></tr>
+<tr><td class="l">Clickbait phrases</td><td class="l">Distinct trigger count and presence</td></tr>
+<tr><td class="l">Interrogative</td><td class="l">Question ending, word/auxiliary onset</td></tr>
+<tr><td class="l">Hyperbole</td><td class="l">Superlative and intensifier counts</td></tr>
+<tr><td class="l">Punctuation</td><td class="l">Exclamations, quotes, ellipsis, colon</td></tr>
+<tr><td class="l">Length</td><td class="l">Word/character counts, word lengths</td></tr>
+<tr><td class="l">Capitalization</td><td class="l">Title-case ratio, all-caps count/ratio</td></tr>
+<tr><td class="l">Informal register</td><td class="l">Slang count</td></tr>
+<tr><td class="l">Affect</td><td class="l">Positive and negative word counts</td></tr>
+<tr><td class="l">Function words</td><td class="l">Stopword ratio</td></tr>
+</tbody></table>
+<p>The combined emotional-word count is omitted because it equals the positive plus negative counts. This removes exact redundancy, while related cues remain correlated.</p>
+</div>
+<footer class="footer"><span>Perceptron-Based Text Classification</span><span>1</span></footer>
 </section>
 
+<section class="page">
+<div class="running"><span>Methodology and model comparison</span><span>Same splits, controlled inputs</span></div>
+<div class="cols">
+<h2 class="first">IV. Learning and Evaluation</h2>
+<h3>A. Averaged perceptron</h3>
+<p>Standardize inputs using training-only statistics. With labels in {&minus;1,+1}, score <i>s</i>(<b>x</b>) = <b>w</b>&middot;<b>x</b> + <i>b</i>. If <i>ys</i>(<b>x</b>) &le; 0, update <b>w</b> &larr; <b>w</b> + &eta;<i>y</i><b>x</b> and <i>b</i> &larr; <i>b</i> + &eta;<i>y</i>. Cached accumulators average the intermediate parameters for prediction.</p>
+<p>Defaults are 30 epochs, learning rate 1.0, shuffled order, and seed 42. Figure 1 diagnoses training, without measuring generalization.</p>
+<h3>B. Two linear reference models</h3>
+<p><b>Engineered logistic regression</b> uses identical standardized inputs to control for the classifier. <b>TF-IDF logistic regression</b> uses lowercased word unigrams/bigrams, sublinear term frequency, and at most 20,000 features.</p>
+<p>Both use L2 regularization, <i>C</i> = 1.0, liblinear, and at most 1,000 iterations [5]. Word/ngram coefficients are inspectable; named cues offer a more compact summary.</p>
+<h3>C. Paired validation</h3>
+<p>All models share the outer split. Within the 25,600 training examples, stratified five-fold validation uses identical folds for all three. Every scaler, vocabulary, and classifier is fitted only to its fold's training subset. Test examples are excluded from every validation fold.</p>
+<p>Metrics are clickbait precision, recall, F1, accuracy, and ROC-AUC from decision scores. Validation summaries use fold means and population standard deviations, rather than confidence intervals or superiority tests. Settings remain fixed.</p>
+</div>
+<table class="tbl">
+<caption>Table II. Held-out performance on 6,400 original headlines</caption>
+<thead><tr><th class="l">Model</th><th>Features</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1</th><th>ROC-AUC</th></tr></thead>
+<tbody>
+<tr><td class="l">Averaged perceptron</td><td>32</td><td>0.9750</td><td>0.9768</td><td>0.9731</td><td>0.9750</td><td>0.9969</td></tr>
+<tr><td class="l">Engineered logistic regression</td><td>32</td><td>0.9759</td><td>0.9745</td><td>0.9775</td><td>0.9760</td><td>0.9977</td></tr>
+<tr><td class="l">TF-IDF logistic regression</td><td>20,000</td><td>0.9689</td><td>0.9741</td><td>0.9634</td><td>0.9687</td><td>0.9957</td></tr>
+</tbody></table>
+<table class="tbl">
+<caption>Table III. Paired five-fold validation within the training partition</caption>
+<thead><tr><th class="l">Model</th><th>Accuracy (%)</th><th>F1</th><th>ROC-AUC</th></tr></thead>
+<tbody>
+<tr><td class="l">Averaged perceptron</td><td>97.688 &plusmn; 0.064</td><td>0.9769 &plusmn; 0.0007</td><td>0.99750 &plusmn; 0.00010</td></tr>
+<tr><td class="l">Engineered logistic regression</td><td>97.664 &plusmn; 0.098</td><td>0.9767 &plusmn; 0.0010</td><td>0.99782 &plusmn; 0.00028</td></tr>
+<tr><td class="l">TF-IDF logistic regression</td><td>96.602 &plusmn; 0.297</td><td>0.9657 &plusmn; 0.0030</td><td>0.99471 &plusmn; 0.00041</td></tr>
+</tbody></table>
+<figure class="convergence"><img src="../results/figures/convergence.png" alt="Training accuracy and mistakes per epoch"><figcaption>Fig. 1. Training diagnostics for the 32-feature averaged perceptron. Held-out and paired validation performance are reported separately in Tables II and III.</figcaption></figure>
+<div class="cols">
+<h2>V. Comparison Results</h2>
+<p>The engineered-feature classifiers score similarly. Logistic regression makes six fewer test errors (154 versus 160); the perceptron has slightly higher mean validation accuracy. This reversal discourages an algorithm-superiority claim.</p>
+<p>Both exceed this TF-IDF configuration. We next test their representation's dependence on typography, a potential obstacle to transfer.</p>
+</div>
+<footer class="footer"><span>Perceptron-Based Text Classification</span><span>2</span></footer>
+</section>
+
+<section class="page">
+<div class="running"><span>Controlled robustness experiment</span><span>Frozen models and unchanged labels</span></div>
+<h2 class="first">VI. Capitalization Dependence</h2>
+<div class="cols">
+<h3>A. Feature ablation and text perturbation</h3>
+<p>Train three perceptron variants on original text: all 32 features; 29 excluding title-case ratio and all-caps count/ratio; and title-case ratio alone. Each uses its own training-fitted scaler with identical epochs and seed.</p>
+<p>Freeze each model and scaler. Evaluate the same 6,400 examples as original text; sentence case (<code>str.capitalize()</code>, uppercasing the first character and lowercasing the rest); and capitalized token initials, preserving remaining characters. Labels stay fixed.</p>
+<h3>B. Scope of the intervention</h3>
+<p>These interventions reveal typography sensitivity. Sentence casing also affects acronyms and proper names. Capitalized token initials give title-case ratio one throughout this corpus. Neither change replicates a specific outlet's policy.</p>
+<p>The 29-feature model is invariant by construction. This checks the partition without establishing robustness to paraphrases, vocabulary change, or source shift.</p>
+</div>
+<table class="tbl">
+<caption>Table IV. Frozen-model test accuracy under capitalization changes</caption>
+<thead><tr><th class="l">Training feature set</th><th>Features</th><th>Original (%)</th><th>Sentence case (%)</th><th>Capitalized tokens (%)</th></tr></thead>
+<tbody>
+<tr><td class="l">All features</td><td>32</td><td>97.50</td><td>50.17</td><td>67.34</td></tr>
+<tr><td class="l">Without capitalization</td><td>29</td><td>90.89</td><td>90.89</td><td>90.89</td></tr>
+<tr><td class="l">Title-case ratio only</td><td>1</td><td>96.17</td><td>50.00</td><td>50.00</td></tr>
+</tbody></table>
+<figure class="robustness"><img src="../results/figures/capitalization_robustness.png" alt="Accuracy of three feature variants under three casing conditions"><figcaption>Fig. 2. Capitalization sensitivity of separately trained feature variants. Bars within a variant use the same frozen classifier, scaler, test examples, and labels.</figcaption></figure>
+<div class="cols">
+<h3>C. Interpretation</h3>
+<p>Sentence casing changes 3,177 full-model predictions. Just 11 of 3,200 clickbait examples remain positive: 0.34% recall and 50.17% accuracy. ROC-AUC remains 0.7865, so threshold failure coexists with residual ranking signal.</p>
+<p>Capitalized token initials change 1,964 predictions, giving 2,021 false positives and 67.34% accuracy. Sensitivity extends beyond lowercasing.</p>
+<p>Title-case ratio alone achieves 96.17%; removing all casing features costs 6.61 accuracy points on original text. Capitalization is a dominant benchmark shortcut.</p>
+<p>This is consistent with publisher-style confounding. Absent source identifiers, attribution to outlets and measurement of cross-source transfer require new data.</p>
+</div>
+<footer class="footer"><span>Perceptron-Based Text Classification</span><span>3</span></footer>
+</section>
+
+<section class="page">
+<div class="running"><span>Model inspection</span><span>Conditional coefficients in standardized coordinates</span></div>
+<h2 class="first">VII. Coefficients and Correlated Inputs</h2>
+<div class="text"><p>A standardized coefficient describes the fitted score change from a one-standard-deviation increase in an input while holding the others fixed. Figure 3 shows the model trained on the full training partition. Title-case ratio has the largest positive coefficient; phrase count and auxiliary onset are also positive. These describe the fitted rule, rather than causal effects or unique measures of linguistic importance [6].</p></div>
+<figure class="weights"><img src="../results/figures/feature_weights.png" alt="All 32 signed coefficients of the averaged perceptron"><figcaption>Fig. 3. Coefficients fitted to the 25,600 training examples. Positive values increase the clickbait score; negative values decrease it. Standardization supplies common units, without removing correlations or making unsupported input combinations realistic.</figcaption></figure>
+<div class="cols">
+<p>Count and presence indicators remain correlated. Phrase count is positive while phrase presence is negative; jointly they specify a contribution for each count. Reading either sign alone can misrepresent that rule.</p>
+<p>Word count, character count, and average word length are also related. Inspection should combine coefficients, contribution sums, ablation, and stability. The casing experiment gives a stronger diagnostic of model reliance than weight ranking alone.</p>
+</div>
+<footer class="footer"><span>Perceptron-Based Text Classification</span><span>4</span></footer>
+</section>
+
+<section class="page">
+<div class="running"><span>Interpretation, scope, and conclusions</span><span>Evidence and limits</span></div>
+<div class="cols">
+<h2 class="first">VIII. Stability and Score Explanations</h2>
+<h3>A. Coefficients across folds</h3>
+<p>Table V summarizes coefficients from five training-only validation fits. Sign agreement is the fraction matching the full-training coefficient's sign; each fold uses its own training scaler. Means and population standard deviations describe these five fits, not uncertainty over all possible datasets.</p>
+<table class="tbl compact">
+<caption>Table V. Selected standardized coefficient summaries</caption>
+<thead><tr><th class="l">Feature</th><th>Mean &plusmn; SD</th><th>Sign<br>agreement</th></tr></thead>
+<tbody>
+<tr><td class="l">Title-case ratio</td><td>114.05 &plusmn; 3.65</td><td>100%</td></tr>
+<tr><td class="l">Phrase count</td><td>42.73 &plusmn; 15.09</td><td>100%</td></tr>
+<tr><td class="l">Phrase presence</td><td>&minus;20.08 &plusmn; 9.70</td><td>100%</td></tr>
+<tr><td class="l">Exclamation count</td><td>0.80 &plusmn; 0.43</td><td>0%</td></tr>
+<tr><td class="l">Year presence</td><td>0.08 &plusmn; 0.32</td><td>80%</td></tr>
+<tr><td class="l">Ellipsis presence</td><td>&minus;1.39 &plusmn; 1.30</td><td>80%</td></tr>
+</tbody></table>
+<p>The full-training exclamation coefficient is &minus;0.25, while every fold coefficient is positive. This does not support a claim that exclamations intrinsically reduce clickbait. Stable signs can also coexist with variable magnitudes, as the phrase features show.</p>
+<h3>B. Additive explanations</h3>
+<p>For raw input <i>x</i><sub>j</sub>, contribution <i>c</i><sub>j</sub> = <i>w</i><sub>j</sub>(<i>x</i><sub>j</sub> &minus; &mu;<sub>j</sub>)/&sigma;<sub>j</sub>, using training statistics and scale one for constant inputs. The score equals bias plus all contributions. A shortened display retains the omitted terms' sum.</p>
+<p>For <i>17 Things Only People Who Love Coffee Will Understand</i>, the model predicts clickbait. Table VI reconstructs the score, rounded for display. This illustrates arithmetic rather than independently evaluating explanation quality.</p>
+<table class="tbl compact">
+<caption>Table VI. An additive score explanation</caption>
+<thead><tr><th class="l">Term</th><th>Contribution</th></tr></thead>
+<tbody>
+<tr><td class="l">Title-case ratio</td><td>+88.80</td></tr>
+<tr><td class="l">Phrase count</td><td>+80.08</td></tr>
+<tr><td class="l">Phrase presence</td><td>&minus;63.08</td></tr>
+<tr><td class="l">Positive-word count</td><td>+31.14</td></tr>
+<tr><td class="l">Numeric onset</td><td>+23.08</td></tr>
+<tr><td class="l">Stopword ratio</td><td>&minus;6.90</td></tr>
+<tr><td class="l">All remaining features</td><td>&minus;19.11</td></tr>
+<tr><td class="l">Bias</td><td>&minus;44.03</td></tr>
+<tr><td class="l"><b>Decision score</b></td><td><b>+89.98</b></td></tr>
+</tbody></table>
+<p>Contributions are relative to training means, so a raw zero can contribute a nonzero amount. Scores are margins, not calibrated probabilities; their scale should not be compared directly across models.</p>
+<h2>IX. Limitations and Reproducibility</h2>
+<p>The benchmark is English, headline-only, and drawn from one historical corpus. Lexicons cover limited vocabulary. Correlated cues, source style, and prior corpus examination constrain conclusions. There is no external, source-held-out, or temporal evaluation, nor evidence of deployment performance.</p>
+<p>Casing interventions preserve labels and expose the specified sensitivity, without covering every distribution shift. The 29-feature variant trades original-corpus accuracy for casing invariance. Independently collected headlines are needed before choosing a deployment model.</p>
+<p>Run <code>python main.py</code> from the repository root. Metrics include configuration, package versions, data and source hashes, fold scores, perturbation conditions, and explanation terms. CSVs expose coefficients and stability; figures come from the same run. These results supersede earlier 33-feature reports.</p>
+<h2>X. Conclusion</h2>
+<p>The 32-feature averaged perceptron performs strongly on this corpus; logistic regression on identical inputs performs similarly. The clearest finding is capitalization sensitivity despite high original-text accuracy. Compact linear models make this dependence inspectable, but transparency alone does not ensure generalization. Future work should prioritize independent publishers and time periods, with robustness and feature-group analysis alongside predictive metrics.</p>
+<h2>References</h2>
+<ol class="refs">
+<li>A. Chakraborty, B. Paranjape, S. Kakarla, and N. Ganguly, "Stop Clickbait: Detecting and preventing clickbaits in online news media," <i>Proc. ASONAM</i>, 2016, pp. 9-16. <a href="https://doi.org/10.1109/ASONAM.2016.7752207">doi:10.1109/ASONAM.2016.7752207</a>.</li>
+<li>F. Rosenblatt, "The perceptron: A probabilistic model for information storage and organization in the brain," <i>Psychological Review</i>, vol. 65, no. 6, pp. 386-408, 1958. <a href="https://doi.org/10.1037/h0042519">doi:10.1037/h0042519</a>.</li>
+<li>Y. Freund and R. E. Schapire, "Large margin classification using the perceptron algorithm," <i>Machine Learning</i>, vol. 37, pp. 277-296, 1999. <a href="https://doi.org/10.1023/A:1007662407062">doi:10.1023/A:1007662407062</a>.</li>
+<li>M. Collins, "Discriminative training methods for hidden Markov models: Theory and experiments with perceptron algorithms," <i>Proc. EMNLP</i>, 2002, pp. 1-8. <a href="https://aclanthology.org/W02-1001/">ACL Anthology W02-1001</a>.</li>
+<li>Scikit-learn developers, "LogisticRegression," <i>scikit-learn documentation</i>. <a href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html">Official API reference</a>. Accessed November 4, 2026.</li>
+<li>Scikit-learn developers, "Common pitfalls in the interpretation of coefficients of linear models," <i>scikit-learn documentation</i>. <a href="https://scikit-learn.org/stable/auto_examples/inspection/plot_linear_model_coefficient_interpretation.html">Official interpretation example</a>. Accessed November 4, 2026.</li>
+</ol>
+</div>
+<footer class="footer"><span>Perceptron-Based Text Classification</span><span>5</span></footer>
+</section>
 </body>
 </html>

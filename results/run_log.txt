@@ -14,71 +14,80 @@
 ======================================================================
 2. Engineering interpretable features
 ======================================================================
-  33 engineered features:
-    starts_with_number, contains_number, number_token_count, contains_year, second_person_count, has_second_person, first_person_count, demonstrative_count, has_forward_reference, clickbait_phrase_count, has_clickbait_phrase, is_question, starts_with_question_word, starts_with_auxiliary, superlative_count, intensifier_count, exclamation_count, question_mark_count, has_ellipsis, double_quote_count, has_colon, word_count, char_count, avg_word_length, long_word_ratio, title_case_ratio, all_caps_word_count, all_caps_ratio, slang_count, positive_word_count, negative_word_count, emotional_word_count, stopword_ratio
-  feature extraction : 2.76s (86.2 µs/headline)
+  32 engineered features:
+    starts_with_number, contains_number, number_token_count, contains_year, second_person_count, has_second_person, first_person_count, demonstrative_count, has_forward_reference, clickbait_phrase_count, has_clickbait_phrase, is_question, starts_with_question_word, starts_with_auxiliary, superlative_count, intensifier_count, exclamation_count, question_mark_count, has_ellipsis, double_quote_count, has_colon, word_count, char_count, avg_word_length, long_word_ratio, title_case_ratio, all_caps_word_count, all_caps_ratio, slang_count, positive_word_count, negative_word_count, stopword_ratio
+  feature extraction : 5.01s (156.7 Âµs/headline)
 
 ======================================================================
 3. Training averaged perceptron (from scratch)
 ======================================================================
-  epoch   1/30: updates=  1055  train_acc=0.9748
-  epoch   2/30: updates=   912  train_acc=0.9756
-  epoch   3/30: updates=   852  train_acc=0.9766
-  epoch   4/30: updates=   837  train_acc=0.9768
-  epoch   5/30: updates=   825  train_acc=0.9768
-  epoch   6/30: updates=   817  train_acc=0.9771
-  epoch   7/30: updates=   793  train_acc=0.9770
-  epoch   8/30: updates=   818  train_acc=0.9772
-  epoch   9/30: updates=   832  train_acc=0.9773
-  epoch  10/30: updates=   843  train_acc=0.9772
-  epoch  11/30: updates=   820  train_acc=0.9773
-  epoch  12/30: updates=   829  train_acc=0.9771
-  epoch  13/30: updates=   825  train_acc=0.9771
-  epoch  14/30: updates=   820  train_acc=0.9771
-  epoch  15/30: updates=   766  train_acc=0.9771
-  epoch  16/30: updates=   811  train_acc=0.9771
-  epoch  17/30: updates=   820  train_acc=0.9771
-  epoch  18/30: updates=   837  train_acc=0.9775
-  epoch  19/30: updates=   799  train_acc=0.9771
-  epoch  20/30: updates=   822  train_acc=0.9770
-  epoch  21/30: updates=   818  train_acc=0.9771
-  epoch  22/30: updates=   815  train_acc=0.9772
-  epoch  23/30: updates=   801  train_acc=0.9772
-  epoch  24/30: updates=   829  train_acc=0.9771
-  epoch  25/30: updates=   829  train_acc=0.9770
-  epoch  26/30: updates=   798  train_acc=0.9770
-  epoch  27/30: updates=   799  train_acc=0.9770
-  epoch  28/30: updates=   815  train_acc=0.9770
-  epoch  29/30: updates=   823  train_acc=0.9770
-  epoch  30/30: updates=   844  train_acc=0.9770
+  epoch   1/30: updates=  1063  train_acc=0.9747
+  epoch   2/30: updates=   906  train_acc=0.9755
+  epoch   3/30: updates=   851  train_acc=0.9764
+  epoch   4/30: updates=   844  train_acc=0.9768
+  epoch   5/30: updates=   821  train_acc=0.9770
+  epoch   6/30: updates=   853  train_acc=0.9770
+  epoch   7/30: updates=   851  train_acc=0.9772
+  epoch   8/30: updates=   832  train_acc=0.9774
+  epoch   9/30: updates=   826  train_acc=0.9770
+  epoch  10/30: updates=   838  train_acc=0.9775
+  epoch  11/30: updates=   820  train_acc=0.9775
+  epoch  12/30: updates=   834  train_acc=0.9771
+  epoch  13/30: updates=   846  train_acc=0.9771
+  epoch  14/30: updates=   825  train_acc=0.9770
+  epoch  15/30: updates=   806  train_acc=0.9772
+  epoch  16/30: updates=   831  train_acc=0.9774
+  epoch  17/30: updates=   811  train_acc=0.9773
+  epoch  18/30: updates=   851  train_acc=0.9772
+  epoch  19/30: updates=   828  train_acc=0.9773
+  epoch  20/30: updates=   786  train_acc=0.9773
+  epoch  21/30: updates=   823  train_acc=0.9773
+  epoch  22/30: updates=   840  train_acc=0.9773
+  epoch  23/30: updates=   800  train_acc=0.9770
+  epoch  24/30: updates=   813  train_acc=0.9775
+  epoch  25/30: updates=   828  train_acc=0.9774
+  epoch  26/30: updates=   804  train_acc=0.9774
+  epoch  27/30: updates=   814  train_acc=0.9774
+  epoch  28/30: updates=   813  train_acc=0.9775
+  epoch  29/30: updates=   826  train_acc=0.9775
+  epoch  30/30: updates=   856  train_acc=0.9775
   [Averaged perceptron (engineered features)]
-    accuracy  : 0.9756
-    precision : 0.9777
-    recall    : 0.9734
-    f1        : 0.9756
-    roc_auc   : 0.9971
-    confusion : TN=3129 FP=71 FN=85 TP=3115
+    accuracy  : 0.9750
+    precision : 0.9768
+    recall    : 0.9731
+    f1        : 0.9750
+    roc_auc   : 0.9969
+    confusion : TN=3126 FP=74 FN=86 TP=3114
 
 ======================================================================
 3b. Verification against variants & scikit-learn
 ======================================================================
-  vanilla_perceptron_acc      : 0.97
-  averaged_perceptron_acc     : 0.9756
-  sklearn_perceptron_acc      : 0.967
+  vanilla_perceptron_acc      : 0.9708
+  averaged_perceptron_acc     : 0.975
+  sklearn_perceptron_acc      : 0.965
 
 ======================================================================
-4. 5-fold stratified cross-validation (perceptron)
+3c. Logistic regression on the same engineered features
 ======================================================================
-  accuracy  : 0.9764 ± 0.0017
-  precision : 0.9751 ± 0.0042
-  recall    : 0.9778 ± 0.0025
-  f1        : 0.9764 ± 0.0017
-  roc_auc   : 0.9973 ± 0.0003
+  [Logistic regression (same engineered features)]
+    accuracy  : 0.9759
+    precision : 0.9745
+    recall    : 0.9775
+    f1        : 0.9760
+    roc_auc   : 0.9977
+    confusion : TN=3118 FP=82 FN=72 TP=3128
 
 ======================================================================
-5. Black-box baseline (TF-IDF + Logistic Regression)
+4. Paired 5-fold cross-validation (training partition only)
 ======================================================================
-  [TF-IDF + LogReg (black-box)]
+  averaged_perceptron       accuracy 0.9769 Â± 0.0006  AUC 0.9975 Â± 0.0001
+  engineered_logreg         accuracy 0.9766 Â± 0.0010  AUC 0.9978 Â± 0.0003
+  tfidf_logreg_baseline     accuracy 0.9660 Â± 0.0030  AUC 0.9947 Â± 0.0004
+
+======================================================================
+5. TF-IDF + Logistic Regression (linear text baseline)
+======================================================================
+  [TF-IDF + LogReg (linear text baseline)]
     accuracy  : 0.9689
     precision : 0.9741
     recall    : 0.9634
@@ -90,97 +99,114 @@
 6. Head-to-head comparison
 ======================================================================
   model                               features   accuracy       f1   roc_auc
-  Averaged perceptron (engineered)          33     0.9756   0.9756    0.9971
-  TF-IDF + LogReg (black-box)           20,000     0.9689   0.9687    0.9957
+  Averaged perceptron (engineered)          32     0.9750   0.9750    0.9969
+  LogReg (same engineered features)         32     0.9759   0.9760    0.9977
+  TF-IDF + LogReg                       20,000     0.9689   0.9687    0.9957
+
+======================================================================
+6b. Capitalization ablation and frozen-model stress tests
+======================================================================
+  full (32 features)
+    original            : accuracy 0.9750
+    sentence_case       : accuracy 0.5017
+    capitalized_tokens  : accuracy 0.6734
+  without_capitalization (29 features)
+    original            : accuracy 0.9089
+    sentence_case       : accuracy 0.9089
+    capitalized_tokens  : accuracy 0.9089
+  title_case_only (1 features)
+    original            : accuracy 0.9617
+    sentence_case       : accuracy 0.5000
+    capitalized_tokens  : accuracy 0.5000
 
 ======================================================================
 7. Generating figures
 ======================================================================
-  figures written to C:\Users\arton\OneDrive - kosovopolice.com\3. SEMESTRI 3\1. Procesimi i gjuhëve natyrale\Projekti\clickbait-perceptron\results\figures
+  figures written to C:\Users\jonkl\source\repos\clickbait-perceptron\results\figures
 
 ======================================================================
-8. Interpretability — strongest cues
+8. Conditional model coefficients (correlated cues can share effects)
 ======================================================================
-  Top clickbait signals:
-    title_case_ratio           +117.604
-    clickbait_phrase_count     +37.165
-    starts_with_auxiliary      +21.529
-    double_quote_count         +17.900
-    slang_count                +16.511
-    word_count                 +11.992
-    starts_with_number         +11.481
-    starts_with_question_word  +10.141
-  Top legitimate-news signals:
-    is_question                -17.645
-    has_clickbait_phrase       -17.442
-    char_count                 -8.089
-    all_caps_word_count        -4.060
-    has_forward_reference      -2.966
-    long_word_ratio            -2.941
-    has_second_person          -2.807
-    question_mark_count        -2.126
+  Most positive model coefficients:
+    title_case_ratio           +115.369
+    clickbait_phrase_count     +51.875
+    starts_with_auxiliary      +25.767
+    double_quote_count         +17.681
+    slang_count                +16.262
+    word_count                 +11.545
+    starts_with_number         +11.461
+    starts_with_question_word  +9.524
+  Most negative model coefficients:
+    has_clickbait_phrase       -26.310
+    is_question                -17.817
+    char_count                 -7.747
+    all_caps_word_count        -4.163
+    has_forward_reference      -3.258
+    long_word_ratio            -2.711
+    has_second_person          -2.474
+    question_mark_count        -2.221
 
 ======================================================================
 8b. Per-headline explanations (case study)
 ======================================================================
 
   "17 Things Only People Who Love Coffee Will Understand"
-    -> clickbait  (score +87.286)
-       title_case_ratio         value=1      contrib=+90.518
-       clickbait_phrase_count   value=1      contrib=+49.849
-       has_clickbait_phrase     value=1      contrib=-37.124
-       starts_with_number       value=1      contrib=+23.118
-       emotional_word_count     value=1      contrib=+16.675
-       positive_word_count      value=1      contrib=+16.632
+    -> clickbait  (score +89.977)
+       title_case_ratio         value=1      contrib=+88.796
+       clickbait_phrase_count   value=1      contrib=+80.082
+       has_clickbait_phrase     value=1      contrib=-63.075
+       positive_word_count      value=1      contrib=+31.138
+       starts_with_number       value=1      contrib=+23.077
+       stopword_ratio           value=0.111111 contrib=-6.899
 
   "You Won't Believe What This Dog Did Next"
-    -> clickbait  (score +48.253)
-       title_case_ratio         value=1      contrib=+90.518
-       clickbait_phrase_count   value=1      contrib=+49.849
-       has_clickbait_phrase     value=1      contrib=-37.124
-       demonstrative_count      value=1      contrib=+14.840
-       second_person_count      value=1      contrib=+10.056
-       char_count               value=40     contrib=+7.578
+    -> clickbait  (score +53.653)
+       title_case_ratio         value=1      contrib=+88.796
+       clickbait_phrase_count   value=1      contrib=+80.082
+       has_clickbait_phrase     value=1      contrib=-63.075
+       demonstrative_count      value=1      contrib=+15.619
+       second_person_count      value=1      contrib=+9.249
+       has_forward_reference    value=1      contrib=-8.128
 
   "Which Disney Princess Are You Based On Your Zodiac Sign"
-    -> clickbait  (score +166.308)
-       clickbait_phrase_count   value=2      contrib=+115.379
-       title_case_ratio         value=1      contrib=+90.518
-       starts_with_question_word value=1      contrib=+38.876
-       has_clickbait_phrase     value=1      contrib=-37.124
-       second_person_count      value=2      contrib=+23.972
-       stopword_ratio           value=0.4    contrib=+8.423
+    -> clickbait  (score +202.033)
+       clickbait_phrase_count   value=2      contrib=+179.814
+       title_case_ratio         value=1      contrib=+88.796
+       has_clickbait_phrase     value=1      contrib=-63.075
+       starts_with_question_word value=1      contrib=+36.512
+       second_person_count      value=2      contrib=+22.049
+       stopword_ratio           value=0.4    contrib=+8.356
 
   "Senate Approves Budget Deal After Months of Negotiation"
-    -> not clickbait  (score -48.777)
-       title_case_ratio         value=0.875  contrib=+41.387
-       clickbait_phrase_count   value=0      contrib=-15.681
-       has_clickbait_phrase     value=0      contrib=+8.194
-       stopword_ratio           value=0.125  contrib=-6.215
-       avg_word_length          value=6      contrib=+5.959
-       starts_with_number       value=0      contrib=-5.702
+    -> not clickbait  (score -47.591)
+       title_case_ratio         value=0.875  contrib=+40.594
+       clickbait_phrase_count   value=0      contrib=-19.650
+       has_clickbait_phrase     value=0      contrib=+10.974
+       stopword_ratio           value=0.125  contrib=-6.166
+       starts_with_number       value=0      contrib=-5.692
+       avg_word_length          value=6      contrib=+5.674
 
   "Scientists Discover New Species of Frog in the Amazon"
-    -> not clickbait  (score -121.623)
-       title_case_ratio         value=0.666667 contrib=-40.498
-       clickbait_phrase_count   value=0      contrib=-15.681
-       has_clickbait_phrase     value=0      contrib=+8.194
-       starts_with_number       value=0      contrib=-5.702
-       double_quote_count       value=0      contrib=-5.078
-       stopword_ratio           value=0.333333 contrib=+4.875
+    -> not clickbait  (score -118.784)
+       title_case_ratio         value=0.666667 contrib=-39.742
+       clickbait_phrase_count   value=0      contrib=-19.650
+       has_clickbait_phrase     value=0      contrib=+10.974
+       starts_with_number       value=0      contrib=-5.692
+       double_quote_count       value=0      contrib=-5.016
+       starts_with_auxiliary    value=0      contrib=-4.882
 
   "Stocks Fall Sharply as Oil Prices Surge"
-    -> not clickbait  (score -56.955)
-       title_case_ratio         value=0.857143 contrib=+34.368
-       clickbait_phrase_count   value=0      contrib=-15.681
-       word_count               value=7      contrib=-9.806
-       has_clickbait_phrase     value=0      contrib=+8.194
-       char_count               value=39     contrib=+8.125
-       starts_with_number       value=0      contrib=-5.702
+    -> not clickbait  (score -55.604)
+       title_case_ratio         value=0.857143 contrib=+33.708
+       clickbait_phrase_count   value=0      contrib=-19.650
+       has_clickbait_phrase     value=0      contrib=+10.974
+       word_count               value=7      contrib=-9.439
+       char_count               value=39     contrib=+7.782
+       starts_with_number       value=0      contrib=-5.692
 
 ======================================================================
 Done
 ======================================================================
-  metrics  -> C:\Users\arton\OneDrive - kosovopolice.com\3. SEMESTRI 3\1. Procesimi i gjuhëve natyrale\Projekti\clickbait-perceptron\results\metrics.json
-  weights  -> C:\Users\arton\OneDrive - kosovopolice.com\3. SEMESTRI 3\1. Procesimi i gjuhëve natyrale\Projekti\clickbait-perceptron\results\feature_weights.csv
-  figures  -> C:\Users\arton\OneDrive - kosovopolice.com\3. SEMESTRI 3\1. Procesimi i gjuhëve natyrale\Projekti\clickbait-perceptron\results\figures
+  metrics  -> C:\Users\jonkl\source\repos\clickbait-perceptron\results\metrics.json
+  weights  -> C:\Users\jonkl\source\repos\clickbait-perceptron\results\feature_weights.csv
+  figures  -> C:\Users\jonkl\source\repos\clickbait-perceptron\results\figures

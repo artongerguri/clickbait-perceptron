@@ -1,12 +1,11 @@
 """Engineered lexical & stylistic features for clickbait detection.
 
-This module is the analytical core of the project. Rather than feeding raw
-bag-of-words/TF-IDF vectors to the classifier (a "black-box" approach), we hand
-craft a compact set of *interpretable* numeric features, each of which encodes a
-well-motivated linguistic cue. Because every feature has a human-readable name,
-the weights the perceptron assigns to them can be read directly as "how strongly
-does this cue signal clickbait", which is exactly the interpretability goal of
-the project.
+This module builds a compact set of named numeric features, each encoding a
+linguistic cue. These cues support inspection of the fitted linear model at a
+higher level than individual word/ngram coefficients. Their standardized weights
+describe conditional contributions within that model: correlated cues can share
+or redistribute weight, so coefficients are not causal effects or unique
+measures of a cue's importance.
 
 Feature families
 ----------------
@@ -20,7 +19,7 @@ Feature families
 8.  Length                    — word/char counts, average & long-word ratio.
 9.  Capitalization            — title-case ratio, ALL-CAPS tokens.
 10. Informal register         — internet slang (AF, OMG, WTF ...).
-11. Affect                    — small positive/negative/emotion lexicons.
+11. Affect                    — small positive/negative lexicons.
 12. Function words            — stopword ratio (phrasal vs. headline-ese).
 """
 
@@ -86,7 +85,6 @@ NEGATIVE_WORDS = {
     "hate", "crazy", "insane", "fail", "disgusting", "creepy", "worst",
     "embarrassing", "painful", "tragic", "disturbing", "scary", "sad", "brutal",
 }
-EMOTION_WORDS = POSITIVE_WORDS | NEGATIVE_WORDS
 
 STOPWORDS = {
     "the", "a", "an", "and", "or", "but", "of", "to", "in", "on", "for", "with",
@@ -207,7 +205,6 @@ class FeatureExtractor:
             # 11. Affect
             ("positive_word_count", self._positive_word_count),
             ("negative_word_count", self._negative_word_count),
-            ("emotional_word_count", self._emotional_word_count),
             # 12. Function words
             ("stopword_ratio", self._stopword_ratio),
         ]
@@ -386,10 +383,6 @@ class FeatureExtractor:
     @staticmethod
     def _negative_word_count(p: _Parsed) -> float:
         return float(sum(t in NEGATIVE_WORDS for t in p.tokens_lc))
-
-    @staticmethod
-    def _emotional_word_count(p: _Parsed) -> float:
-        return float(sum(t in EMOTION_WORDS for t in p.tokens_lc))
 
     # 12. Function words
     @staticmethod

@@ -4,17 +4,18 @@ The classic Perceptron (Rosenblatt, 1958) is an online, mistake-driven linear
 classifier. We implement the *averaged* variant (Freund & Schapire, 1999),
 which returns the average of all intermediate weight vectors instead of the last
 one. Averaging dramatically reduces variance and typically yields far better
-generalization at essentially no extra inference cost, while remaining a *linear*
-and therefore fully *interpretable* model: the learned weight of each engineered
-feature is a direct, signed measure of how strongly that cue pushes a headline
-toward "clickbait" (positive) or "not clickbait" (negative).
+generalization at essentially no extra inference cost, while retaining a linear
+score that can be decomposed into named feature contributions. On standardized
+inputs, a coefficient describes a conditional score change with the other
+features held fixed. Correlated cues can redistribute magnitudes and signs, so
+coefficients do not establish causal effects or unique linguistic importance.
 
 The efficient averaging trick (a single cached accumulator rather than summing
 every intermediate weight vector) follows Hal Daumé III's formulation.
 
 The public API deliberately mirrors scikit-learn (`fit`/`predict`/`score`) so the
 model is a drop-in component in the evaluation pipeline and comparable to the
-black-box baseline on equal footing.
+high-dimensional linear baseline on equal footing.
 """
 
 from __future__ import annotations

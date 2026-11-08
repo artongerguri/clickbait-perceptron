@@ -1,11 +1,11 @@
-"""Black-box reference model: TF-IDF features + Logistic Regression.
+"""High-dimensional linear reference model: TF-IDF + Logistic Regression.
 
-The project's thesis is that a small set of *interpretable, engineered* features
-can rival opaque, high-dimensional models. To make that claim measurable we need
-a credible "black-box" opponent. TF-IDF over word 1–2 grams feeding a Logistic
-Regression is the canonical strong-yet-opaque text baseline: it typically uses
-tens of thousands of sparse features with no individual linguistic
-interpretation, in contrast to our ~33 named cues.
+TF-IDF over word 1–2 grams provides a standard text-classification baseline.
+Its individual word/ngram coefficients can be inspected, though a vocabulary
+with thousands of features is harder to summarize than 32 named linguistic
+cues. This comparison therefore contrasts feature representations as well as
+classifiers; a logistic-regression control on the same engineered features
+helps separate their contributions.
 
 We expose the same scikit-learn-style API as :class:`~src.perceptron.AveragedPerceptron`
 so both models can be dropped into the shared evaluation code unchanged.
@@ -20,7 +20,7 @@ from sklearn.pipeline import Pipeline
 
 
 class TfidfLogisticRegression:
-    """Opaque TF-IDF (word 1–2 grams) + Logistic Regression baseline."""
+    """Inspectable, high-dimensional TF-IDF + Logistic Regression baseline."""
 
     def __init__(
         self,
